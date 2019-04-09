@@ -4,9 +4,32 @@
 # To be used on Windows Subsystem for Linux to connect to Host Docker engine
 export DOCKER_HOST="tcp://127.0.0.1:2375"
 
-function docker_is_running() {
+#######################################################################
+# Return status of Docker Engine daemon
+# Arguments:
+#   None
+# Returns:
+#   0 - if up and running, else not running
+#######################################################################
+function docker_up() {
   docker info 2>1 >/dev/null
   echo $?
+}
+
+#######################################################################
+# Detects whether a process is running inside Docker container
+# Arguments:
+#   None
+# Returns:
+#   String
+#######################################################################
+docker_container_active() {
+    docker_status=$(cat /proc/self/cgroup | grep -c docker)
+    if [[ "$docker_status" -eq "0" ]]; then
+        echo "Outside Docker container"
+    else
+        echo "Inside Docker container"
+    fi
 }
 
 #######################################################################
@@ -56,4 +79,11 @@ function docker_container_ip() {
 #######################################################################
 function docker_prune() {
     docker system prune --force 2>/dev/null
+}
+
+# Run nmap from Ubuntu custom image on WSL
+function nmap() {
+  if [[ $(docker_up) -eq "0" ]]; then
+    docker run --rm ubuntu:custom nmap "$@"
+  fi
 }
