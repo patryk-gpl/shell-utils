@@ -24,3 +24,21 @@ function reset_terminal() {
  stty sane
  tput rs1
 }
+
+function _ssh_check_key_checksum() {
+  algorithm=$1;  key=$2
+
+  echo "Checking $algorithm fingerprint of key $key"
+  ssh-keygen  -E $algorithm -lf $key
+}
+
+function ssh_check_key_md5() {
+  key=${1:-~/.ssh/id_rsa}
+  _ssh_check_key_checksum md5 $key
+}
+
+function ssh_check_key() {
+  key=${1:-~/.ssh/id_rsa}
+  _ssh_check_key_checksum sha256 $key
+}
+alias ssh_check_key_sha256="ssh_check_key $@"
