@@ -1,48 +1,64 @@
 #!/usr/bin/env bash
-#####################################################################################################
-# This script will allow to update Git Commit history replacing author name and e-mail.
-#
-# Note:
-#   Be cautious. If no commit range is provided it can re-write the whole Git commit history.
-#   Script can be added to user $PATH to execute on any repository. 
-#
-# Sample usage:
-#   bash update_git_commits.sh "Joe Z" "Joe.Z@example.com" "Joz Z" "joe.z@company.com"
-#   bash update_git_commits.sh "Joe Z" "Joe.Z@example.com" "Joz Z" "joe.z@company.com" d56443a..HEAD
-#####################################################################################################
+# This script allows updating Git commit history by replacing author name and email.
 
-# main
-if [[ $# -lt 4 || $# -gt 5 ]]; then
-    echo "Syntax: $0 <old_name> <old_email> <new_name> <new_email> <first_commit..last_commit>"
-    echo "Commit range is optional, name and email are mandatory!"
-    exit 1
+# Usage: update_git_commits.sh [-r range] old_name old_email new_name new_email
+# -r range: Optional commit range (default: all commits)
+# old_name: Old author name to be replaced
+# old_email: Old author email to be replaced
+# new_name: New author name to replace the old name
+# new_email: New author email to replace the old email
+
+# Parse command-line options
+while getopts ":r:" opt; do
+  case $opt in
+    r)
+      range="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+
+# Check required arguments
+if [[ $# -ne 4 ]]; then
+  echo "Usage: update_git_commits.sh [-r range] old_name old_email new_name new_email"
+  exit 1
 fi
 
-export OLD_NAME=$1
-export OLD_EMAIL=$2
-export NEW_NAME=$3
-export NEW_EMAIL=$4
-shift 4
+# Assign arguments to variables
+old_name="$1"
+old_email="$2"
+new_name="$3"
+new_email="$4"
 
-echo "Apply settings: old_name=$OLD_NAME old_email=$OLD_EMAIL new_name=$NEW_NAME new_email=$NEW_EMAIL"
+echo "Apply settings: old_name=\"$old_name\" old_email=\"$old_email\" new_name=\"$new_name\" new_email=\"$new_email\""
 
-git filter-branch --force --env-filter '
-
-old_name="$OLD_NAME"
-old_email="$OLD_EMAIL"
-new_name="$NEW_NAME"
-new_email="$NEW_EMAIL"
-
-if [ "$GIT_COMMITTER_EMAIL" = "$old_email" ]  || [ "$GIT_COMMITTER_NAME" = "$old_name" ]
-then
-    echo "Updating GIT_COMMITTER_NAME=$GIT_COMMITTER_NAME => $new_name and GIT_COMMITTER_EMAIL=$GIT_COMMITTER_EMAIL => $new_email"
-    export GIT_COMMITTER_NAME="$new_name"
-    export GIT_COMMITTER_EMAIL="$new_email"
+# If commit range is not provided, assume all commits
+if [[ -z $range ]]; then
+  range="-- --all"
+else
+  range="$range --"
 fi
-if [ "$GIT_AUTHOR_EMAIL" = "$old_email" ] || [ "$GIT_AUTHOR_NAME" = "$old_name" ]
-then
-    echo "Updating GIT_AUTHOR_NAME=$GIT_AUTHOR_NAME => $new_name and GIT_AUTHOR_EMAIL=$GIT_AUTHOR_EMAIL => $new_email"
-    export GIT_AUTHOR_NAME="$new_name"
-    export GIT_AUTHOR_EMAIL="$new_email"
+
+# Filter Git history
+if !  git filter-branch --force --env-filter "
+if [ \"\$GIT_COMMITTER_EMAIL\" = \"$old_email\" ] || [ \"\$GIT_COMMITTER_NAME\" = \"$old_name\" ]; then
+    echo \"Updating GIT_COMMITTER_NAME='\$GIT_COMMITTER_NAME' => '$new_name' and GIT_COMMITTER_EMAIL='\$GIT_COMMITTER_EMAIL' => '$new_email'\"
+    export GIT_COMMITTER_NAME=\"$new_name\"
+    export GIT_COMMITTER_EMAIL=\"$new_email\"
 fi
-' --tag-name-filter cat -- --branches --tags "$@"
+if [ \"\$GIT_AUTHOR_EMAIL\" = \"$old_email\" ] || [ \"\$GIT_AUTHOR_NAME\" = \"$old_name\" ]; then
+    echo \"Updating GIT_AUTHOR_NAME='\$GIT_AUTHOR_NAME' => '$new_name' and GIT_AUTHOR_EMAIL='\$GIT_AUTHOR_EMAIL' => '$new_email'\"
+    export GIT_AUTHOR_NAME=\"$new_name\"
+    export GIT_AUTHOR_EMAIL=\"$new_email\"
+fi
+" --tag-name-filter cat "$range"; then
+  echo "An error occurred while updating Git history. Please check your inputs and try again."
+  exit 1
+fi
+
+# Print success message
+echo "Git commit history updated successfully!"
