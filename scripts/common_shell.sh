@@ -20,7 +20,7 @@ copy_dir() {
         echo "Config $config file is missing. No folders will be excluded from copy."
     fi
 
-    echo "Running rsync with options: ${rsync_opts[@]}"
+    echo "Running rsync with options: ${rsync_opts[*]}"
     rsync "${rsync_opts[@]}" "$src/" "$dest"
 }
 
@@ -42,7 +42,7 @@ function git_folder_size() {
             if [ -d "$dir/.git" ]; then
                 size=$(du -sh "$dir" | awk '{print $1}')
                 echo "$size - $dir"
-                if [-f "$dir/.meta" ]; then
+                if [ -f "$dir/.meta" ]; then
                     git_folder_size "$dir"
                 fi
             else
@@ -51,7 +51,6 @@ function git_folder_size() {
         fi
     done | sort -h
 }
-
 
 git_is_shallow_repo() {
     dir=${1:-.}
