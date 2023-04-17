@@ -1,0 +1,25 @@
+name: Check validity of the scripts
+
+on:
+  push:
+    branches:
+      - main
+      - feature/*
+      - dependabot/*
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check shell scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: "./security"
