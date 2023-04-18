@@ -64,7 +64,9 @@ ssl_show_cert_details() {
 ssl_show_cert_headers() {
   _ssl_parse_cert_file "$1" || return 1
   echo "== $1 =="
-  openssl x509 -in "$1" -text -noout | grep -E 'Subject:|Issuer:|Not Before|Not After|DNS:'
+  openssl x509 -in "$1" -text -noout |
+    grep -E 'Signature Algorithm:|Subject:|Issuer:|Not Before|Not After|Public Key Algorithm:|Public-Key:|DNS:' |
+    awk '!a[$0]++'
 }
 
 ssl_check_cert_validity() {
