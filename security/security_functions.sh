@@ -1,30 +1,100 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Function to fetch SSL certificate from a server
-fetch_ssl_cert() {
-  url=${1:-}
-  output_dir=${2:-certs}
+# Helper functions
 
-  if [ -z "$url" ]; then echo "Usage: $0 <url>" && return 1; fi
+_is_openssl_installed() {
   if ! which openssl >/dev/null; then echo "openssl not found" && return 1; fi
-  if [ ! -d "$output_dir" ]; then
-    echo "Creating directory $output_dir"
-    mkdir -p "$output_dir";
+}
+
+_ssl_parse_cert_file() {
+  cert_file=${1:-}
+  if [ -z "$cert_file" ]; then
+    echo "Usage: $0 <cert_file.pem>"
+    return 1
   fi
 
+  _is_openssl_installed
+  if [ ! -f "$cert_file" ]; then
+    echo "File $cert_file not found"
+    return 1
+  fi
+}
 
-  certificate=$(echo | openssl s_client -showcerts -servername "$url" -connect "$url":443 2>/dev/null \
-  | openssl x509 -outform PEM)
+# Main functions
+
+# Function to fetch SSL certificate from a server
+ssl_fetch_cert() {
+  url=${1:-}
+  port=${2:-443}
+  output_dir=${3:-certs}
+
+  if [ -z "$url" ]; then
+    echo "Usage: $0 <url> [<port=443>] [<output_dir=certs>]"
+    return 1
+  fi
+  _is_openssl_installed
+
+  if [ ! -d "$output_dir" ]; then
+    echo "Creating directory $output_dir"
+    mkdir -p "$output_dir"
+  fi
+
+  certificate=$(echo | openssl s_client -showcerts -servername "$url" -connect "$url":"$port" 2>/dev/null |
+    openssl x509 -outform PEM)
 
   if [ -z "$certificate" ]; then
     echo "Unable to obtain SSL certificate from $url"
     return 1
   fi
 
-  if [ -f "${output_dir}/${url}.pem" ]; then
-    mv "${output_dir}/${url}.pem" "${output_dir}/${url}.pem.$(date +%F_%H%M%S)"
+  file_path="${output_dir}/${url}_${port}.pem"
+  if [ -f "$file_path" ]; then
+    mv "$file_path" "$file_path.$(date +%F_%H%M%S)"
   fi
 
-  echo "$certificate" > "${output_dir}/${url}.pem"
-  echo "SSL certificate saved to ${output_dir}/${url}.pem"
+  echo "$certificate" >"$file_path"
+  echo "SSL certificate saved to $file_path"
+}
+
+ssl_show_cert_details() {
+  _ssl_parse_cert_file "$1" || return 1
+  openssl x509 -in "$1" -text -noout
+}
+
+ssl_show_cert_headers() {
+  _ssl_parse_cert_file "$1" || return 1
+  echo "== $1 =="
+  openssl x509 -in "$1" -text -noout | grep -E 'Subject:|Issuer:|Not Before|Not After|DNS:'
+}
+
+ssl_check_cert_validity() {
+  _ssl_parse_cert_file "$1" || return 1
+
+  day_in_seconds=86400
+  if openssl x509 -in "$1" -checkend "$day_in_seconds" -noout; then
+    echo "Certificate is still valid"
+  else
+    echo "Certificate has expired or will expire soon"
+  fi
+}
+
+ssl_check_cert_ca() {
+  _ssl_parse_cert_file "$1" || return 1
+
+  if openssl x509 -in "$1" -text -noout | grep -q 'CA:TRUE'; then
+    echo "Certificate is a CA certificate"
+  else
+    echo "Certificate is not a CA certificate"
+  fi
+}
+
+ssl_create_self_signed_cert() {
+  domain=${1:-}
+  if [ -z "$domain" ]; then
+    echo "Usage: $0 <domain>"
+    return 1
+  fi
+  _is_openssl_installed
+
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$domain".key -out "$domain".crt
 }
