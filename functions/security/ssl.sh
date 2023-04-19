@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-
-# Helper functions
+####################################################################################################
+# This file contains functions to work with SSL certificates
+####################################################################################################
 
 _is_openssl_installed() {
   if ! which openssl >/dev/null; then echo "openssl not found" && return 1; fi
