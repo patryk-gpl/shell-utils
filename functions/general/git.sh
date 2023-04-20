@@ -5,7 +5,7 @@
 
 PARENT_SHARED_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)/shared.sh"
 
-# shellcheck source=shared.sh
+# shellcheck source=functions/shared.sh
 source "$PARENT_SHARED_SCRIPT"
 
 _git_branch_show_timestamps() {
@@ -22,7 +22,7 @@ _git_branch_show_timestamps() {
   fi
 
   echo -e "${yellow}== $label branches ==${reset}"
-  git for-each-ref --sort=-committerdate $ref --format='%(refname:short) %(committerdate:relative)' | while read ref date; do
+  git for-each-ref --sort=-committerdate $ref --format='%(refname:short) %(committerdate:relative)' | while read -r ref; do
     result=$(git show --format="%ci %cr" "$ref" -- | head -n 1)
     echo -e "${color}$result $ref${reset}"
   done
