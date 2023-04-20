@@ -12,14 +12,15 @@ on:
 jobs:
   test:
     name: Test shell scripts
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
-      - name: Check shell scripts
+      - name: Validate with shellcheck
         uses: ludeeus/action-shellcheck@master
         with:
-          scandir: "./security"
+          scandir: "./functions"
