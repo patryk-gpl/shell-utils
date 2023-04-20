@@ -14,7 +14,7 @@
 # dist
 # *.log
 ####################################################################################################
-copy_dir() {
+rsync_copy_dir() {
   src="$1"
   dest="$2"
   config="${3:-$HOME/.rsync.exclude}"
@@ -33,4 +33,16 @@ copy_dir() {
 
   echo "Running rsync with options: ${rsync_opts[*]}"
   rsync "${rsync_opts[@]}" "$src/" "$dest"
+}
+
+# Create a tar archive of files matching a pattern recursively
+tar_backup_file_recursively() {
+  pattern=$1
+  archive_name=$2
+  path=${3:-.}
+  if [[ -z "$pattern" || -z "$archive_name" ]]; then
+    echo "Pattern or archive name is missing. Aborting.."
+    return 1
+  fi
+  find "$path" -type f -name "$pattern" -exec tar -czvf "$archive_name" {} +
 }
