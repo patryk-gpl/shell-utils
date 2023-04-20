@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # This script might be sourced by the other scripts in this directory.
 
+# shellcheck disable=SC2034
 # Colors ANSI escape codes
 reset="\033[0m"
 black="\033[30m"
