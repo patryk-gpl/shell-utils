@@ -1,0 +1,18 @@
+name: SonarCloud analysis
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feature/*
+    paths-ignore:
+      - "**/*.md"
+
+jobs:
+  sonar:
+    uses: kpatryk/workflows/.github/workflows/sonar.yml@v0.1.0
+    with:
+      os: ubuntu-latest
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
