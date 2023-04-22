@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+####################################################################################################
+# This file contains functions to work wc (word count) tool
+####################################################################################################
+
+source "$(dirname "$(dirname "$0")")/shared.sh"
+prevent_to_execute_directly
 
 # Count the number of quotes in a file
 wc_count_quotes_in_file() {
