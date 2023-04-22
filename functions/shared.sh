@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
-# This script might be sourced by the other scripts in this directory.
+####################################################################################################
+# This script contains functions that are used by other functions defined in subdirectories.
+####################################################################################################
 
 # shellcheck disable=SC2034
+
+# Prevent to execute the script directly, only sourced by other scripts is allowed
+prevent_to_execute_directly() {
+  if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "This script is not meant to be executed directly."
+    exit 1
+  fi
+}
+
 # Colors ANSI escape codes
 reset="\033[0m"
 black="\033[30m"

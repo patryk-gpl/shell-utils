@@ -3,6 +3,9 @@
 # This file contains functions to work with SSL certificates
 ####################################################################################################
 
+source "$(dirname "$(dirname "$0")")/shared.sh"
+prevent_to_execute_directly
+
 _is_openssl_installed() {
   if ! which openssl >/dev/null; then echo "openssl not found" && return 1; fi
 }

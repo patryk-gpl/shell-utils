@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+####################################################################################################
+# This file contains functions to work with Kubernetes
+####################################################################################################
+
+source "$(dirname "$(dirname "$0")")/shared.sh"
+prevent_to_execute_directly
 
 # Show the current namespace name
 kube_ns_current() {
