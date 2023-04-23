@@ -13,9 +13,6 @@ function tdebugOff() {
   unset TF_LOG
 }
 
-function tfmt() {
-	terraform fmt $(git rev-parse --show-toplevel) "$@"
-}
 
 function tplan() {
 	tfmt
