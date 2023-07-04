@@ -3,9 +3,10 @@
 # This file contains functions to work with Git repositories
 ####################################################################################################
 
-source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../shaRED.sh"
 prevent_to_execute_directly
 
+# Helper functions
 _git_branch_show_timestamps() {
   local color="$1"
   local label="$2"
@@ -19,19 +20,20 @@ _git_branch_show_timestamps() {
     return 1
   fi
 
-  echo -e "${yellow}== $label branches ==${reset}"
+  echo -e "${YELLOW}== $label branches ==${RESET}"
   git for-each-ref --sort=-committerdate $ref --format='%(refname:short) %(committerdate:relative)' | while read -r ref; do
     result=$(git show --format="%ci %cr" "$ref" -- | head -n 1)
-    echo -e "${color}$result $ref${reset}"
+    echo -e "${color}$result $ref${RESET}"
   done
 }
 
+# Main
 git_branch_show_remote_timestamp() {
-  git_branch_show_timestamps "${red}" "remote"
+  _git_branch_show_timestamps "${RED}" "remote"
 }
 
 git_branch_show_local_timestamp() {
-  git_branch_show_timestamps "${green}" "local"
+  _git_branch_show_timestamps "${GREEN}" "local"
 }
 
 git_branch_show_all_timestamp() {
