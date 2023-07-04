@@ -3,16 +3,8 @@
 # This file contains functions to work with Git repositories
 ####################################################################################################
 
-# shellcheck disable=SC2154
-
-parent_dir=$(dirname "$(dirname "$0")")
-source "$parent_dir/shared.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
 prevent_to_execute_directly
-
-shared_script_path="$parent_dir/shared.sh"
-
-# shellcheck disable=SC1090
-source "$shared_script_path"
 
 _git_branch_show_timestamps() {
   local color="$1"

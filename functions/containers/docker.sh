@@ -3,7 +3,7 @@
 # This file contains functions to work with Docker
 ####################################################################################################
 
-source "$(dirname "$(dirname "$0")")/shared.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
 prevent_to_execute_directly
 
 # Return status of Docker Engine daemon
