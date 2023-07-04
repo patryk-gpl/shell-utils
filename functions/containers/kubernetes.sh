@@ -22,3 +22,8 @@ kube_image_list_names_from_pods() {
 kube_image_list_names_from_pods_all_namespaces() {
   kubectl get pods -A -o=jsonpath="{range .items[*].spec.containers[*]}{.image}{'\n'}{end}" | sort -u
 }
+
+# Show a container runtime version of the current cluster
+kube_show_container_runtime_version() {
+  kubectl get nodes -o jsonpath='{range .items[*]}{.status.nodeInfo.containerRuntimeVersion}{"\n"}{end}' | sort | uniq -c
+}
