@@ -105,6 +105,18 @@ alias kube_get_events_with_warn="kubectl get events --field-selector type=Warnin
 
 alias kube_get_status_metric_server="kubectl get --raw '/apis/metrics.k8s.io/v1beta1/nodes' | jq ."
 
+
+# Function to run a debug container with the given image
+kube_run_debug_container() {
+  local container_name="$1"
+  local container_image="$2"
+  kubectl run -it --rm --restart=Never "$container_name" --image="$container_image" --annotations=sidecar.istio.io/inject=false -- /bin/bash
+}
+
+alias kube_run_debug_busybox_container="kube_run_debug_container busybox-debug busybox"
+alias kube_run_debug_alpine_container="kube_run_debug_container alpine-debug alpine"
+alias kube_run_debug_netshoot_container="kube_run_debug_container netshoot-debug nicolaka/netshoot"
+
 kube_get_all_resources() {
   namespace=${1:-default}
   shift

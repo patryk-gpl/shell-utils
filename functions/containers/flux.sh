@@ -17,3 +17,10 @@ flux_list_all_active_resources() {
 
   kubectl get "$flux_resources" -n "$namespace"
 }
+
+flux_get_all() {
+  local namespace="${1:-flux-ca-system}"
+
+  echo "Using $namespace"
+  flux get all -n "$namespace"
+}
