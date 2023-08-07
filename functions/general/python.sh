@@ -3,7 +3,11 @@
 # This file contains functions to utilize Python CLI
 ####################################################################################################
 
-source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
+if [[ -n "$ZSH_VERSION" ]]; then
+  source "$(dirname "$0")/../shared.sh"
+else
+  source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
+fi
 prevent_to_execute_directly
 
 alias python_find_local_ports_opened='python -c "import socket; open_ports = [port for port in range(1, 65536) if socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect_ex((\"localhost\", port)) == 0]; print(\"Open ports:\", open_ports)"'
