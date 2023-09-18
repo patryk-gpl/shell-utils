@@ -112,3 +112,11 @@ kube_get_all_resources() {
   kubectl api-resources --verbs=list --namespaced -o name |
     xargs -n 1 kubectl get --show-kind --ignore-not-found -n "$namespace" "$@"
 }
+
+kube_show_pods_total_by_namespace() {
+  kubectl get pods --all-namespaces -o custom-columns='NAMESPACE:.metadata.namespace'  | sort | uniq -c | sort -rn
+}
+
+kube_show_cronjobs_by_policy() {
+  kubectl get cronjobs.batch --all-namespaces -o custom-columns="CronJob:.metadata.name,ConcurrencyPolicy:.spec.concurrencyPolicy"
+}
