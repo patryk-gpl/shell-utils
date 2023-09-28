@@ -9,3 +9,5 @@ compile_commands.json
 CTestTestfile.cmake
 
 .DS_Store
+*.txt
+*.log
