@@ -45,6 +45,29 @@ git_branch_show_all_timestamp() {
   git_branch_show_remote_timestamp
 }
 
+git_create_and_push_tag() {
+    local tag=$1
+    local remote
+    remote=$(git remote)
+
+    if git rev-parse --quiet --verify "refs/tags/$tag" >/dev/null; then
+        echo "Local tag '$tag' already exists. Overwriting it."
+        git tag -f "$tag"
+    else
+        echo "Creating local tag '$tag'."
+        git tag "$tag"
+    fi
+
+    if git ls-remote --tags "$remote" "refs/tags/$tag" | grep -q "$tag"; then
+        echo "Remote tag '$tag' already exists. Overwriting it."
+        git push --force "$remote" "$tag"
+    else
+        echo "Pushing local tag '$tag' to remote '$remote'."
+        git push "$remote" "$tag"
+    fi
+}
+
+
 # This function will show the local and remote branch head commit hashes.
 git_current_branch_heads() {
   echo "Local branch head: $(git rev-parse --verify HEAD)"
