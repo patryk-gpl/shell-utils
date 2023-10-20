@@ -1,0 +1,11 @@
+name: Dependency update
+
+on:
+  schedule:
+    - cron: "0 23 * * *"
+
+jobs:
+  pre-commit:
+    uses: kpatryk/workflows/.github/workflows/pre-commit.yml@v0.2.0
+    with:
+      os: ubuntu-latest

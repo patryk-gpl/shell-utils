@@ -1,4 +1,4 @@
-name: SonarQube Analysis
+name: Shellcheck Validation
 
 on:
   workflow_dispatch:
@@ -10,9 +10,8 @@ on:
       - "**/*.md"
 
 jobs:
-  sonar:
-    uses: kpatryk/workflows/.github/workflows/sonar.yml@v0.1.0
+  shellcheck:
+    uses: kpatryk/workflows/.github/workflows/shellcheck.yml@v0.2.0
     with:
       os: ubuntu-latest
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      scandir: functions/
