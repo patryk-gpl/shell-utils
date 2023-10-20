@@ -53,3 +53,23 @@ tar_backup_file_recursively() {
   fi
   find "$path" -type f -name "$pattern" -exec tar -czvf "$archive_name" {} +
 }
+
+# Collect and save a list of files into a single file
+function file_dump_content() {
+  if [[ -z $1 ]]; then
+    echo "Error: Root directory not provided."
+    return 1
+  fi
+
+  local root_dir=$1
+  local output_file=${2:-out.log}
+
+  {
+    echo "Folder structure: "
+    tree -f  --noreport "$root_dir"
+    echo
+    echo "Content of all files from the folder and sub-folders: "
+    find "$root_dir" -type f -exec sh -c 'echo "Filename: $1"; cat "$1"; echo' _ {} \;
+    echo "Wait for the next prompt. Confirm with DONE."
+  } > "$output_file"
+}
