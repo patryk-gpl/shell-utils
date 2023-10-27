@@ -22,16 +22,16 @@ prevent_to_execute_directly
 # *.log
 ####################################################################################################
 rsync_copy_dir() {
-  src="$1"
-  dest="$2"
-  config="${3:-$HOME/.rsync.exclude}"
+  local src="$1"
+  local dest="$2"
+  local config="${3:-$HOME/.rsync.exclude}"
 
   if [[ ! -d "$src" || ! -d "$dest" ]]; then
     echo "Source or destination are missing. Aborting.."
     return 1
   fi
 
-  rsync_opts=("-a")
+  local rsync_opts=("-a")
   if [[ -f "$config" ]]; then
     rsync_opts+=("--exclude-from=$config")
   else
@@ -44,13 +44,21 @@ rsync_copy_dir() {
 
 # Create a tar archive of files matching a pattern recursively
 tar_backup_file_recursively() {
-  pattern=$1
-  archive_name=$2
-  path=${3:-.}
+  local pattern=$1
+  local archive_name=$2
+  local path=${3:-.}
+
   if [[ -z "$pattern" || -z "$archive_name" ]]; then
-    echo "Pattern or archive name is missing. Aborting.."
+    echo "Error: Missing pattern or archive name. Please provide both parameters."
+    echo "Usage: tar_backup_file_recursively <pattern> <archive_name> [path]"
     return 1
   fi
+
+  if [[ ! -d "$path" ]]; then
+    echo "Error: Invalid path. The specified directory does not exist."
+    return 1
+  fi
+
   find "$path" -type f -name "$pattern" -exec tar -czvf "$archive_name" {} +
 }
 

@@ -23,10 +23,11 @@ alias kube_get_pods_by_age_all_namespaces="kubectl get pod --sort-by=.metadata.c
 
 # List all images used in the current namespace
 kube_image_list_names_from_pods() {
-  namespace=${1:-$(kube_ns_current)}
+  local namespace=${1:-$(kube_ns_current)}
 
   kubectl get pods -n "$namespace" -o=jsonpath="{range .items[*].spec.containers[*]}{.image}{'\n'}{end}" | sort -u
 }
+
 
 # List all images used in all namespaces
 kube_image_list_names_from_pods_all_namespaces() {
@@ -59,7 +60,7 @@ kube_get_pods_by_age() {
 }
 
 kube_get_pod_termination_reason() {
-  reason=$1
+  local reason=$1
   kubectl get pod "$reason" -o go-template="{{range .status.containerStatuses}}{{.lastState.terminated.message}}{{end}}"
 }
 
@@ -77,7 +78,8 @@ kube_show_container_runtime_version() {
 ## Deployments / Replica Sets
 
 kube_delete_replica_sets() {
-  namespace=${1:-$(kubectl config view --minify --output 'jsonpath={..namespace}')}
+  local namespace=${1:-$(kubectl config view --minify --output 'jsonpath={..namespace}')}
+  local rs
   rs=$(kubectl get rs -n "$namespace" --no-headers | awk '{if ($2 + $3 + $4 == 0) print $1}')
   if [ -z "$rs" ]; then
     echo "No resources found to clean in $namespace namespace."
@@ -106,7 +108,7 @@ alias kube_get_events_with_warn="kubectl get events --field-selector type=Warnin
 alias kube_get_status_metric_server="kubectl get --raw '/apis/metrics.k8s.io/v1beta1/nodes' | jq ."
 
 kube_get_all_resources() {
-  namespace=${1:-default}
+  local namespace=${1:-default}
   shift
   echo "== Show all resources created in namespace: $namespace"
   kubectl api-resources --verbs=list --namespaced -o name |

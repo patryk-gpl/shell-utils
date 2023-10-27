@@ -50,12 +50,13 @@ docker_prune_all_force() {
 
 # Remove all dangling Docker containers, images, volumes and networks
 docker_clean_all() {
-  objects=(container image volume network)
+  local objects=(container image volume network)
   for object in "${objects[@]}"; do
     echo "Removing dangling $object (if any)..."
     docker "$object" prune -f
   done
 }
+
 
 # List Docker images sorted by size
 docker_image_ls_by_size() {
@@ -63,15 +64,19 @@ docker_image_ls_by_size() {
 }
 
 docker_container_ip() {
-  container_id=${1:-$(docker_latest_container_id)}
-  if "$container_id"; then
-    echo "Missing container ID"
-    return
+  local container_id=${1:-$(docker_latest_container_id)}
+  if [[ -z "$container_id" ]]; then
+    echo "Error: Missing container ID"
+    return 1
   fi
 
+  local container_ip
   container_ip=$(docker inspect --format '{{.NetworkSettings.IPAddress}}' "$container_id")
+
+  local container_name
   container_name=$(docker inspect --format '{{.Name}}' "$container_id")
-  if [ -n "$container_ip" ]; then
+
+  if [[ -n "$container_ip" ]]; then
     echo "Container $container_name has IP: $container_ip"
   else
     echo "Container $container_name has no IP address assigned"
