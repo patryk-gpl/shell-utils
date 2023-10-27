@@ -184,3 +184,19 @@ git_get_repo_urls_recursive() {
 
     echo -e "\n== List of retrieved repository URLs stored in: $output_file =="
 }
+
+function git_cmd_recursive {
+  local git_command=("$@")
+  local parent_dir
+  local git_dir
+
+  if [ ${#git_command[@]} -eq 0 ]; then
+    git_command=("pull")
+  fi
+
+  while IFS= read -r -d '' git_dir; do
+    parent_dir=$(dirname "$git_dir")
+    echo "== $parent_dir =="
+    (cd "$parent_dir" && git "${git_command[@]}")
+  done < <(find . -name ".git" -type d -print0)
+}
