@@ -14,7 +14,7 @@ prevent_to_execute_directly
 mirror_web_site() {
     if [ -z "$1" ]; then
         echo "Error: No URL provided. Please provide a URL as an argument."
-        exit 1
+        return 1
     fi
 
     url=$1
