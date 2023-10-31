@@ -10,11 +10,11 @@ else
 fi
 prevent_to_execute_directly
 
-_is_openssl_installed() {
+function _is_openssl_installed() {
   if ! which openssl >/dev/null; then echo "openssl not found" && return 1; fi
 }
 
-_ssl_parse_cert_file() {
+function _ssl_parse_cert_file() {
   cert_file=${1:-}
   if [ -z "$cert_file" ]; then
     echo "Usage: $0 <cert_file.pem>"
@@ -31,7 +31,7 @@ _ssl_parse_cert_file() {
 # Main functions
 
 # Function to fetch SSL certificate from a server
-ssl_fetch_cert() {
+function ssl_fetch_cert() {
   url=${1:-}
   port=${2:-443}
   output_dir=${3:-certs}
@@ -64,12 +64,12 @@ ssl_fetch_cert() {
   echo "SSL certificate saved to $file_path"
 }
 
-ssl_show_cert_details() {
+function ssl_show_cert_details() {
   _ssl_parse_cert_file "$1" || return 1
   openssl x509 -in "$1" -text -noout
 }
 
-ssl_show_cert_headers() {
+function ssl_show_cert_headers() {
   _ssl_parse_cert_file "$1" || return 1
   echo "== $1 =="
   openssl x509 -in "$1" -text -noout |
@@ -77,7 +77,7 @@ ssl_show_cert_headers() {
     awk '!a[$0]++'
 }
 
-ssl_check_cert_validity() {
+function ssl_check_cert_validity() {
   _ssl_parse_cert_file "$1" || return 1
 
   day_in_seconds=86400
@@ -88,7 +88,7 @@ ssl_check_cert_validity() {
   fi
 }
 
-ssl_check_cert_ca() {
+function ssl_check_cert_ca() {
   _ssl_parse_cert_file "$1" || return 1
 
   if openssl x509 -in "$1" -text -noout | grep -q 'CA:TRUE'; then
@@ -98,7 +98,7 @@ ssl_check_cert_ca() {
   fi
 }
 
-ssl_create_self_signed_cert() {
+function ssl_create_self_signed_cert() {
   domain=${1:-}
   if [ -z "$domain" ]; then
     echo "Usage: $0 <domain>"

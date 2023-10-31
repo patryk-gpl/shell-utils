@@ -10,7 +10,7 @@ else
 fi
 prevent_to_execute_directly
 
-envrc_archive_all() {
+function envrc_archive_all() {
   if [[ $# -eq 0 ]]; then
     echo "Error: Root directory not provided."
     return 1
@@ -24,7 +24,7 @@ envrc_archive_all() {
   echo "Archive created: $output_file"
 }
 
-envrc_enable_all() {
+function envrc_enable_all() {
   if [[ $# -eq 0 ]]; then
     echo "Error: Root directory not provided."
     return 1

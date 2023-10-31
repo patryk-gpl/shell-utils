@@ -6,7 +6,7 @@
 # shellcheck disable=SC2034
 
 # Prevent to execute the script directly, only sourced by other scripts is allowed
-prevent_to_execute_directly() {
+function prevent_to_execute_directly() {
   if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "This script is not meant to be executed directly."
     exit 1
@@ -25,7 +25,7 @@ cyan="\033[36m"
 white="\033[37m"
 
 # Return the OS type
-find_os_type() {
+function find_os_type() {
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     echo "linux"
   elif [[ "$OSTYPE" == "darwin"* ]]; then

@@ -10,7 +10,7 @@ else
 fi
 prevent_to_execute_directly
 
-flux_list_all_active_resources() {
+function flux_list_all_active_resources() {
   local flux_resources
   local namespace="$1"
   flux_resources=$(kubectl api-resources --verbs=list -n "$namespace" -o name | awk '/flux/' | paste -sd "," -)

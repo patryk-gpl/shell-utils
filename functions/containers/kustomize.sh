@@ -10,10 +10,10 @@ else
 fi
 prevent_to_execute_directly
 
-kust_apply() {
+function kust_apply() {
   kustomize build | kubectl apply -f -
 }
 
-kust_delete() {
+function kust_delete() {
   kustomize build | kubectl delete -f -
 }

@@ -11,7 +11,7 @@ fi
 prevent_to_execute_directly
 
 
-gh_delete_disabled_workflows_history() {
+function gh_delete_disabled_workflows_history() {
   if [[ -z $1 || -z $2 ]]; then
     echo "Error: Missing organization and repository names as arguments."
     echo "Usage: gh_delete_disabled_workflows_history <organization> <repository>"

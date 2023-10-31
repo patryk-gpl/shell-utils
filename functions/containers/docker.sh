@@ -12,7 +12,7 @@ fi
 prevent_to_execute_directly
 
 # Return status of Docker Engine daemon
-docker_daemon_started() {
+function docker_daemon_started() {
   if docker info >/dev/null 2>&1; then
     echo "Docker is up and running."
   else
@@ -21,7 +21,7 @@ docker_daemon_started() {
 }
 
 # Are we running inside a Docker container?
-docker_container_active() {
+function docker_container_active() {
   if grep -q '^/docker/' /proc/1/cgroup; then
     echo "Running inside Docker container"
   else
@@ -30,7 +30,7 @@ docker_container_active() {
 }
 
 # Show Docker image labels
-docker_image_labels() {
+function docker_image_labels() {
   if [[ -z "$1" ]]; then
     echo "Missing docker image name"
     return
@@ -39,17 +39,17 @@ docker_image_labels() {
 }
 
 # Show latest Docker container ID
-docker_latest_container_id() {
+function docker_latest_container_id() {
   docker ps --last 1 -q
 }
 
 # Docker prune all containers, images, volumes and networks without asking for confirmation
-docker_prune_all_force() {
+function docker_prune_all_force() {
   docker system prune --all --force --volumes
 }
 
 # Remove all dangling Docker containers, images, volumes and networks
-docker_clean_all() {
+function docker_clean_all() {
   local objects=(container image volume network)
   for object in "${objects[@]}"; do
     echo "Removing dangling $object (if any)..."
@@ -59,11 +59,11 @@ docker_clean_all() {
 
 
 # List Docker images sorted by size
-docker_image_ls_by_size() {
+function docker_image_ls_by_size() {
   docker image ls --format '{{.Size}}\t{{.Repository}}:{{.Tag}}' | sort -hr
 }
 
-docker_container_ip() {
+function docker_container_ip() {
   local container_id=${1:-$(docker_latest_container_id)}
   if [[ -z "$container_id" ]]; then
     echo "Error: Missing container ID"

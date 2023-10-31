@@ -21,7 +21,7 @@ prevent_to_execute_directly
 # dist
 # *.log
 ####################################################################################################
-rsync_copy_dir() {
+function rsync_copy_dir() {
   local src="$1"
   local dest="$2"
   local config="${3:-$HOME/.rsync.exclude}"
@@ -43,7 +43,7 @@ rsync_copy_dir() {
 }
 
 # Create a tar archive of files matching a pattern recursively
-tar_backup_file_recursively() {
+function tar_backup_file_recursively() {
   local pattern=$1
   local archive_name=$2
   local path=${3:-.}

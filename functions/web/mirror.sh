@@ -11,7 +11,7 @@ fi
 prevent_to_execute_directly
 
 # Create a mirror of the web page locally
-mirror_web_site() {
+function mirror_web_site() {
     if [ -z "$1" ]; then
         echo "Error: No URL provided. Please provide a URL as an argument."
         return 1
@@ -24,7 +24,7 @@ mirror_web_site() {
 
     logFile="download_${fqdn}.log"
 
-    check_and_remove_empty_file() {
+    function check_and_remove_empty_file() {
         local filename="$1"
         if [ -e "$filename" ]; then
             if [ -s "$filename" ]; then
@@ -35,7 +35,7 @@ mirror_web_site() {
         fi
     }
 
-    show_stats() {
+    function show_stats() {
         local domain="$1"
         num_files=$(find "$domain" -type f -print | wc -l)
         num_dirs=$(find "$domain" -type d -print | wc -l)

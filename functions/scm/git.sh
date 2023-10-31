@@ -11,7 +11,7 @@ fi
 prevent_to_execute_directly
 
 # Helper functions
-_git_branch_show_timestamps() {
+function _git_branch_show_timestamps() {
   local color="$1"
   local label="$2"
 
@@ -32,20 +32,20 @@ _git_branch_show_timestamps() {
 }
 
 # Main
-git_branch_show_remote_timestamp() {
+function git_branch_show_remote_timestamp() {
   _git_branch_show_timestamps "${RED}" "remote"
 }
 
-git_branch_show_local_timestamp() {
+function git_branch_show_local_timestamp() {
   _git_branch_show_timestamps "${GREEN}" "local"
 }
 
-git_branch_show_all_timestamp() {
+function git_branch_show_all_timestamp() {
   git_branch_show_local_timestamp
   git_branch_show_remote_timestamp
 }
 
-git_create_and_push_tag() {
+function git_create_and_push_tag() {
     local tag=$1
     local remote
     remote=$(git remote)
@@ -69,13 +69,13 @@ git_create_and_push_tag() {
 
 
 # This function will show the local and remote branch head commit hashes.
-git_current_branch_heads() {
+function git_current_branch_heads() {
   echo "Local branch head: $(git rev-parse --verify HEAD)"
   echo "Remote branch head: $(git rev-parse --verify 'HEAD@{upstream}')"
 }
 
 # Search for a pattern in the Git history
-git_history_search() {
+function git_history_search() {
   [ -z "$1" ] && {
     echo "Missing pattern. Aborting.."
     return
@@ -86,7 +86,7 @@ git_history_search() {
 }
 
 # Search for a pattern in all commits, show the commit hash and the line number
-git_grep_all_commits() {
+function git_grep_all_commits() {
   [ -z "$1" ] && {
     echo "Missing pattern. Aborting.."
     return
@@ -98,7 +98,7 @@ git_grep_all_commits() {
 }
 
 # Show folder name and its size, sort the result
-git_folder_size() {
+function git_folder_size() {
   git_dir=${1:-"."}
   [ ! -d "$git_dir" ] || [ ! -f "$git_dir/.git" ] && {
     echo "Source directory is missing or not a Git folder. Aborting.."
@@ -121,7 +121,7 @@ git_folder_size() {
 }
 
 # Clone a Git repository with depth 1 (shallow clone)
-git_clone_shallow() {
+function git_clone_shallow() {
   [ -z "$1" ] && {
     echo "Missing URL. Aborting.." >&2
     return 1
@@ -136,14 +136,14 @@ git_clone_shallow() {
 }
 
 # Run 'git gc' command on all Git repositories recursively, starting from the current directory if no argument is provided
-git_gc_recursively() {
+function git_gc_recursively() {
   dir=${1:-.}
   echo "Running 'git gc' command on directories containing '.git' starting from $dir recursively"
   find "$dir" -type d -name ".git" -execdir git gc {} \;
 }
 
 
-git_get_repo_urls_recursive() {
+function git_get_repo_urls_recursive() {
     if [[ "$#" -eq "0" ]]; then
         echo "Error: Root directory not provided."
         return 1
@@ -152,7 +152,7 @@ git_get_repo_urls_recursive() {
     local root_dir="$1"
     local output_file="git_repo_list.txt"
 
-    traverse_directories() {
+    function traverse_directories() {
         local dir="$1"
         if git -C "$dir" rev-parse --is-inside-work-tree &> /dev/null; then
             remote=$(git -C "$dir" remote)
@@ -202,7 +202,7 @@ function git_cmd_recursive {
 }
 
 # shellcheck disable=SC2086
-git_config_show_all() {
+function git_config_show_all() {
     local attribute="$1"
     local configs=("global" "local" "system")
 
