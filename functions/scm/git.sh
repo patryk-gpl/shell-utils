@@ -200,3 +200,19 @@ function git_cmd_recursive {
     (cd "$parent_dir" && git "${git_command[@]}")
   done < <(find . -name ".git" -type d -print0)
 }
+
+# shellcheck disable=SC2086
+git_config_show_all() {
+    local attribute="$1"
+    local configs=("global" "local" "system")
+
+    echo "== Checking attribute: $attribute =="
+    for config in "${configs[@]}"; do
+        echo -n "${config^} Configuration: "
+        if git config --${config} --get "$attribute" >/dev/null 2>&1; then
+            git config --${config} --get "$attribute"
+        else
+            echo "Attribute not found."
+        fi
+    done
+}
