@@ -77,3 +77,18 @@ docker_container_ip() {
     echo "Container $container_name has no IP address assigned"
   fi
 }
+
+docker_tags_remove_all() {
+  if [ -z "$1" ]; then
+    echo "Error: Image name not provided."
+    return 1
+  fi
+
+  local image_name="$1"
+  local tags
+  tags=$(docker image ls --format '{{.Repository}}:{{.Tag}}' | grep "$image_name")
+
+  for tag in $tags; do
+    docker image rm "$tag"
+  done
+}
