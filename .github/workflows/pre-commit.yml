@@ -2,7 +2,7 @@ name: Dependency update
 
 on:
   schedule:
-    - cron: "0 23 * * *"
+    - cron: "0 6 * * 1"
 
 jobs:
   pre-commit:
