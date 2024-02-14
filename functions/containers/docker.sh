@@ -11,6 +11,15 @@ fi
 
 prevent_to_execute_directly
 
+# Get a list of authenticated Docker registries
+docker_auth_list() {
+  if [[ -f ~/.docker/config.json ]]; then
+    jq -r '.auths | keys []' ~/.docker/config.json
+  else
+    echo "No Docker authentication found"
+  fi
+}
+
 # Return status of Docker Engine daemon
 docker_daemon_started() {
   if docker info >/dev/null 2>&1; then
