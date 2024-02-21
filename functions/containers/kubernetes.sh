@@ -10,9 +10,8 @@ else
 fi
 prevent_to_execute_directly
 
-
 ## Check validitiy of the TLS/SSL certificate stored in the K8S secret
-function kube_secret_check_cert_expiry() {
+kube_secret_check_cert_expiry() {
   if [[ $# -ne 2 ]]; then
     echo "Usage: kube_secret_check_cert_expiry <secret-name> <namespace>"
     return 1
@@ -104,6 +103,25 @@ kube_image_list_names_from_pods() {
 # List all images used in all namespaces
 kube_image_list_names_from_pods_all_namespaces() {
   kubectl get pods -A -o=jsonpath="{range .items[*].spec.containers[*]}{.image}{'\n'}{end}" | sort -u
+}
+
+kube_get_logs_from_pod_containers_with_filter() {
+  local pod_name="$1"
+  local namespace="$2"
+  local filter="$3"
+
+  if [[ -z "$pod_name" || -z "$namespace" || -z "$filter" ]]; then
+    echo "Usage: ${FUNCNAME[0]} <pod_name> <namespace> <filter>"
+    return 1
+  fi
+
+  local containers
+  containers=$(kubectl get pod "$pod_name" -n "$namespace" -o=jsonpath='{.spec.containers[*].name}')
+
+  for container in $containers; do
+    echo -e "${GREEN}== Logs for container $container in pod $pod_name ==${RESET}"
+    kubectl logs -n "$namespace" "$pod_name" -c "$container" | grep -E -i "$filter"
+  done
 }
 
 kube_dump_all_logs_from_pods() {
