@@ -10,10 +10,6 @@ else
 fi
 prevent_to_execute_directly
 
-_is_openssl_installed() {
-  if ! which openssl >/dev/null; then echo "openssl not found" && return 1; fi
-}
-
 _ssl_parse_cert_file() {
   cert_file=${1:-}
   if [ -z "$cert_file" ]; then
@@ -21,7 +17,7 @@ _ssl_parse_cert_file() {
     return 1
   fi
 
-  _is_openssl_installed
+  _is_tool_installed openssl
   if [ ! -f "$cert_file" ]; then
     echo "File $cert_file not found"
     return 1
@@ -30,23 +26,36 @@ _ssl_parse_cert_file() {
 
 # Main functions
 
-# Function to fetch SSL certificate from a server
-ssl_fetch_cert() {
-  url=${1:-}
-  port=${2:-443}
-  output_dir=${3:-certs}
+ssl_fetch_fullchain() {
+  _is_tool_installed openssl awk
+  local url=${1:-}
 
   if [ -z "$url" ]; then
-    echo "Usage: $0 <url> [<port=443>] [<output_dir=certs>]"
+    echo "Usage: $0 <url> [<output_file=url.pem>]"
     return 1
   fi
-  _is_openssl_installed
+  output_file="$url.pem"
 
-  if [ ! -d "$output_dir" ]; then
-    echo "Creating directory $output_dir"
-    mkdir -p "$output_dir"
+  openssl s_client -showcerts -connect "$url" </dev/null 2>/dev/null \
+  | awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/' > "$output_file"
+
+  echo "SSL certificate saved to $output_file"
+  echo "Number of saved certificate in the chain: $(grep -c 'BEGIN CERTIFICATE' "$output_file")"
+}
+
+# Function to fetch SSL certificate from a server
+ssl_fetch_cert() {
+  _is_tool_installed openssl
+
+  local url=${1:-}
+  local port=${2:-443}
+
+  if [ -z "$url" ]; then
+    echo "Usage: $0 <url> [<port=443>]"
+    return 1
   fi
 
+  echo "Fetching SSL certificate from url=$url, port=$port"
   certificate=$(echo | openssl s_client -showcerts -servername "$url" -connect "$url":"$port" 2>/dev/null |
     openssl x509 -outform PEM)
 
@@ -55,22 +64,27 @@ ssl_fetch_cert() {
     return 1
   fi
 
-  file_path="${output_dir}/${url}_${port}.pem"
-  if [ -f "$file_path" ]; then
-    mv "$file_path" "$file_path.$(date +%F_%H%M%S)"
-  fi
-
+  file_path="${url}_${port}.pem"
   echo "$certificate" >"$file_path"
   echo "SSL certificate saved to $file_path"
 }
 
 ssl_show_cert_details() {
-  _ssl_parse_cert_file "$1" || return 1
-  openssl x509 -in "$1" -text -noout
+  local url=${1:-}
+  local port=${2:-443}
+
+  if [ -z "$url" ]; then
+    echo "Usage: $0 <url> [<port=443>]"
+    return 1
+  fi
+
+  openssl s_client -showcerts -connect "$url:$port" </dev/null 2>/dev/null | openssl x509 -noout -text
 }
 
 ssl_show_cert_headers() {
+  _is_tool_installed openssl awk
   _ssl_parse_cert_file "$1" || return 1
+
   echo "== $1 =="
   openssl x509 -in "$1" -text -noout |
     grep -E 'Signature Algorithm:|Subject:|Issuer:|Not Before|Not After|Public Key Algorithm:|Public-Key:|DNS:' |
@@ -104,7 +118,7 @@ ssl_create_self_signed_cert() {
     echo "Usage: $0 <domain>"
     return 1
   fi
-  _is_openssl_installed
+  _is_tool_installed openssl
 
   openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$domain".key -out "$domain".crt
 }
