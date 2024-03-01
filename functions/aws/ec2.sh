@@ -54,3 +54,14 @@ aws_ec2_stop(){
   echo "Stopping the AWS EC2 instance $instance_id..."
   aws ec2 stop-instances --instance-ids "$instance_id" | jq .
 }
+
+aws_ec2_get_instace_id_by_ip() {
+  local ip_address="$1"
+
+  if [[ -z "$ip_address" ]]; then
+    echo "Usage: aws_ec2_get_instace_id_by_ip_address <ip_address>"
+    return 1
+  fi
+
+  aws ec2 describe-instances --filters Name=private-ip-address,Values=$ip_address  --query 'Reservations[].Instances[].InstanceId' --output text
+}
