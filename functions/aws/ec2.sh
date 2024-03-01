@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-####################################################################################################
 # This file contains functions to work with AWS EC2
-####################################################################################################
 
 aws_ec2_status() {
   local instance_id="$1"
@@ -17,17 +15,30 @@ aws_ec2_status() {
 
 aws_ec2_restart_instance() {
   local instance_id="$1"
+  if [[ -z "$instance_id" ]]; then
+    echo "Usage: aws_ec2_restart_instance <instance_id>"
+    return 1
+  fi
 
-  aws_ec2_status "$instance_id" || return $?
+  state=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].State.Name' --output text)
 
-  echo "Do you want to reboot the AWS EC2 instance $instance_id? (y/n)"
-  read -r answer
-  if [[ "$answer" != "y" ]]; then
-      echo "The AWS EC2 instance $instance_id was not rebooted."
-      return 0
-  else
-      echo "Rebooting the AWS EC2 instance $instance_id..."
+  if [[ "$state" == "running" ]]; then
+    echo "Do you want to reboot the AWS EC2 instance $instance_id? (y/n)"
+    read -r answer
+    if [[ "$answer" != "y" ]]; then
+        echo "The AWS EC2 instance $instance_id was not rebooted."
+        return 0
+    else
       aws ec2 reboot-instances --instance-ids "$instance_id" | jq .
+    fi
+  else
+    echo "The AWS EC2 instance $instance_id is not running. Do you want to start it? (y/n)"
+    read -r answer
+    if [[ "$answer" != "y" ]]; then
+        echo "The AWS EC2 instance $instance_id was not started."
+        return 0
+    fi
+    aws_ec2_start "$instance_id"
   fi
 }
 
