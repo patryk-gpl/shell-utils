@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
-####################################################################################################
 # This script contains functions that are used by other functions defined in subdirectories.
-####################################################################################################
 
 # shellcheck disable=SC2034
-
 # Prevent to execute the script directly, only sourced by other scripts is allowed
 prevent_to_execute_directly() {
   if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
