@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-####################################################################################################
 # This file contains functions to work with files and folders
-####################################################################################################
 
 if [[ -n "$ZSH_VERSION" ]]; then
   source "$(dirname "$0")/../shared.sh"
@@ -10,7 +8,7 @@ else
 fi
 prevent_to_execute_directly
 
-####################################################################################################
+
 # Copy folders recursively, excluding files and folders from a config file
 # ~/.rsync.exclude should contain a list of files and folders to be excluded
 #
@@ -20,7 +18,6 @@ prevent_to_execute_directly
 # node_modules
 # dist
 # *.log
-####################################################################################################
 rsync_copy_dir() {
   src="$1"
   dest="$2"
