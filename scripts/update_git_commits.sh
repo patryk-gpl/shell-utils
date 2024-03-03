@@ -40,7 +40,7 @@ echo "Apply settings: old_name=\"$old_name\" old_email=\"$old_email\" new_name=\
 if [[ -z $range ]]; then
   range="-- --all"
 else
-  range="$range --"
+  range="$range"
 fi
 
 # Filter Git history
