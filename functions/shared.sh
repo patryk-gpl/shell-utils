@@ -40,16 +40,9 @@ find_os_type() {
 _is_tool_installed() {
   tools=("$@")
   for tool in "${tools[@]}"; do
-    if [ -z "$tool" ]; then
-      echo "Usage: $0 <tool1> [<tool2> ...] to verify if it is installed"
-      return 1
-    fi
-
     if ! which "$tool" >/dev/null; then
-      echo "$tool not found"
+      echo -e "${RED}Error: ${RESET} $tool is not installed"
       return 1
-    else
-      echo "$tool found"
     fi
   done
 }
