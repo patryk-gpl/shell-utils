@@ -18,6 +18,19 @@ docker_auth_list() {
   fi
 }
 
+# Remove all local Docker images with a specific prefix
+docker_image_remove_with_prefix() {
+  local prefix="$1"
+
+  if [ -z "$prefix" ]; then
+    echo "Usage: $0 <prefix>"
+    echo "Prefix is required"
+    return 1
+  fi
+
+  docker images --format "{{.Repository}}:{{.Tag}}" | grep "^$prefix" | xargs -I {} docker rmi {}
+}
+
 # Return status of Docker Engine daemon
 docker_daemon_started() {
   if docker info >/dev/null 2>&1; then
@@ -52,11 +65,16 @@ docker_latest_container_id() {
 
 # Docker prune all containers, images, volumes and networks without asking for confirmation
 docker_prune_all_force() {
-  docker system prune --all --force --volumes
+  echo "Pruning all Docker containers, images, volumes and networks..."
+  read -p "Are you sure? " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    docker system prune --all --force --volumes
+  fi
 }
 
 # Remove all dangling Docker containers, images, volumes and networks
-docker_clean_all() {
+docker_prune_dangling_objects() {
   objects=(container image volume network)
   for object in "${objects[@]}"; do
     echo "Removing dangling $object (if any)..."
