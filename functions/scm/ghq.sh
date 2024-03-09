@@ -9,7 +9,7 @@ fi
 prevent_to_execute_directly
 
 
-function cdq() {
+cdq() {
     if [[ -z "$1" ]]; then
         echo "Error: Please provide a directory name."
         return 1
@@ -26,7 +26,7 @@ function cdq() {
     fi
 }
 
-function ghq_tree() {
+ghq_tree() {
   local root_dir="${1:-~/$HOME}"
 
   if [ -d "$root_dir" ]; then
