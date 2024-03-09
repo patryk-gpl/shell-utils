@@ -52,7 +52,7 @@ tar_backup_file_recursively() {
 }
 
 # Collect and save a list of files into a single file
-function file_dump_content() {
+file_dump_content() {
   if [[ -z $1 ]]; then
     echo "Error: Root directory not provided."
     return 1
