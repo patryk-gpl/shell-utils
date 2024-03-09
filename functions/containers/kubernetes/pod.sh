@@ -8,10 +8,6 @@ else
 fi
 prevent_to_execute_directly
 
-kube_get_pods_by_age() {
-    kubectl get pod --sort-by=.metadata.creationTimestamp "$@"
-}
-
 # List all images used in the current namespace
 kube_list_image_names_from_pods() {
   kubectl get pods -n "$namespace" -o=jsonpath="{range .items[*].spec.containers[*]}{.image}{'\n'}{end}" "$@" | sort -u
