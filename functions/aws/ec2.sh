@@ -9,8 +9,9 @@ aws_ec2_status() {
     return 1
   fi
 
-  echo "State of the AWS EC2 instances: ${instance_ids[@]}"
-  aws ec2 describe-instances --instance-ids "${instance_ids[@]}" --query 'Reservations[].Instances[].{Name: Tags[?Key==`Name`].Value | [0], State: State.Name}' --output table
+  echo "State of the AWS EC2 instances:" "${instance_ids[@]}"
+  aws ec2 describe-instances --instance-ids "${instance_ids[@]}" \
+  --query 'Reservations[].Instances[].{Name: Tags[?Key=="Name"].Value | [0], State: State.Name}' --output table
 }
 
 aws_ec2_start(){
@@ -21,7 +22,7 @@ aws_ec2_start(){
     return 1
   fi
 
-  echo "Starting the AWS EC2 instances: ${instance_ids[@]}"
+  echo "Starting the AWS EC2 instances:" "${instance_ids[@]}"
   aws ec2 start-instances --instance-ids "${instance_ids[@]}" --output json | jq .
 }
 
@@ -33,7 +34,7 @@ aws_ec2_stop(){
     return 1
   fi
 
-  echo "Stopping the AWS EC2 instances: ${instance_ids[@]}"
+  echo "Stopping the AWS EC2 instances:" "${instance_ids[@]}"
   aws ec2 stop-instances --instance-ids "${instance_ids[@]}" --output json | jq .
 }
 
@@ -44,7 +45,8 @@ aws_ec2_restart_instance() {
     return 1
   fi
 
-  state=$(aws ec2 describe-instances --instance-ids $instance_id --query 'Reservations[].Instances[].State.Name' --output text)
+  state=$(aws ec2 describe-instances --instance-ids "$instance_id" \
+  --query 'Reservations[].Instances[].State.Name' --output text)
 
   if [[ "$state" == "running" ]]; then
     echo "Do you want to reboot the AWS EC2 instance $instance_id? (y/n)"
@@ -74,5 +76,6 @@ aws_ec2_get_instace_id_by_ip() {
     return 1
   fi
 
-  aws ec2 describe-instances --filters Name=private-ip-address,Values=$ip_address  --query 'Reservations[].Instances[].InstanceId' --output text
+  aws ec2 describe-instances --filters Name=private-ip-address,Values="$ip_address" \
+  --query 'Reservations[].Instances[].InstanceId' --output text
 }
