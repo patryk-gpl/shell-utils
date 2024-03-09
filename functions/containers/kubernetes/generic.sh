@@ -50,7 +50,7 @@ kube_get_resource_with_custom_column_namespace() {
 #
 # Usage: kube_cmd_clusters <kubectl_command>
 #
-# This function allows running the provided kubectl_command on multiple Kubernetes clusters.
+# Allow running the provided kubectl_command on multiple Kubernetes clusters.
 # It reads the cluster names from a configuration file located at $HOME/.kube/clusters.conf.
 # Each cluster name should be defined as a key-value pair in the INI format, with one cluster per line.
 #
