@@ -8,6 +8,8 @@ else
 fi
 prevent_to_execute_directly
 
+alias minikube_show_k8s_versions="minikube config defaults kubernetes-version"
+
 minikube_reset() {
   minikube delete --all
   minikube start
