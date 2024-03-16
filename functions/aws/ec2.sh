@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# This file contains functions to work with AWS EC2
+# Functions to work with AWS EC2
 
 aws_ec2_status() {
   local instance_ids=("$@")

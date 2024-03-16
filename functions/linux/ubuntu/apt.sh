@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# This file contains functions to work with Ubuntu apt package manager
+# Functions to work with Ubuntu apt package manager
 
 if [[ -n "$ZSH_VERSION" ]]; then
   source "$(dirname "$0")/../../shared.sh"

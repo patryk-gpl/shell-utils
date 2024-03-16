@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# This file contains functions to work with Kubernetes cluster global operations
+# Functions to work with Kubernetes cluster global operations
 
 if [[ -n "$ZSH_VERSION" ]]; then
   source "$(dirname "$0")/../../shared.sh"
