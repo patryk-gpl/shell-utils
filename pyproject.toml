@@ -1,14 +1,13 @@
 [tool.poetry]
 name = "shell-utils"
-version = "0.1.0"
-description = ""
+version = "0.2.0"
+description = "Helper scripts and utils"
 authors = ["Patryk Kubiak <Patryk.Kubiak@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pyyaml = "^6.0.1"
-
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.2.2"
