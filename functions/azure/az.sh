@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ####################################################################################################
-# This file contains functions to work with Azure CLI
+# Functions to work with Azure CLI
 ####################################################################################################
 
 if [[ -n "$ZSH_VERSION" ]]; then
