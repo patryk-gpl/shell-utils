@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# This file contains functions to work with Git grep
+# Functions to work with Git grep
 if [[ -n "$ZSH_VERSION" ]]; then
   source "$(dirname "$0")/../../shared.sh"
 else

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# This file contains functions to work with Flux v2
+# Functions to work with Flux v2
 
 if [[ -n "$ZSH_VERSION" ]]; then
   source "$(dirname "$0")/../shared.sh"
