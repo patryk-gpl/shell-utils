@@ -1,1 +1,7 @@
-disable=SC1091
+# Allow opening any 'source'd file, even if not specified as input
+external-sources=true
+
+# Specify the shell to use
+shell=bash
+
+disable=SC2154 # Variable is referenced but not assigned.
