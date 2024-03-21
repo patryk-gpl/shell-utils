@@ -37,11 +37,7 @@ new_email="$4"
 echo "Apply settings: old_name=\"$old_name\" old_email=\"$old_email\" new_name=\"$new_name\" new_email=\"$new_email\""
 
 # If commit range is not provided, assume all commits
-if [[ -z $range ]]; then
-  range="-- --all"
-else
-  range="$range"
-fi
+[[ -z $range ]] && range="-- --all"
 
 # Filter Git history
 if !  git filter-branch --force --env-filter "
