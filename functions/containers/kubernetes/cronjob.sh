@@ -11,6 +11,6 @@ prevent_to_execute_directly
 ## Cronjobs / jobs
 alias kube_delete_jobs_with_success_status="kubectl delete jobs --field-selector status.successful=1"
 
-kube_show_cronjobs_by_policy() {
+kube_cronjobs_show_by_policy() {
   kubectl get cronjobs.batch --all-namespaces -o custom-columns="CronJob:.metadata.name,ConcurrencyPolicy:.spec.concurrencyPolicy"
 }
