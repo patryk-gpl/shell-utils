@@ -13,7 +13,7 @@ kube_list_image_names_from_pods() {
   kubectl get pods -n "$namespace" -o=jsonpath="{range .items[*].spec.containers[*]}{.image}{'\n'}{end}" "$@" | sort -u
 }
 
-kube_get_logs_from_pod_containers_with_filter() {
+kube_pod_get_logs_from_pod_containers_with_filter() {
   local pod_name="$1"
   local namespace="$2"
   local filter="$3"
@@ -32,7 +32,25 @@ kube_get_logs_from_pod_containers_with_filter() {
   done
 }
 
-kube_dump_all_logs_from_pods() {
+function kube_pods_describe_all() {
+  namespace=$1
+  if [ -z "$namespace" ]; then
+    echo "Usage: kube_pods_describe_all <namespace>"
+    return 1
+  fi
+
+  local filename="podsDescribeAll-${namespace}.log"
+  echo "== Processing pod descriptions for namespace $namespace ==" | tee "$filename"
+  pods=$(kubectl get pods -n "$namespace" -o jsonpath='{.items[*].metadata.name}')
+
+  for pod in $pods; do
+    echo "Describe pod $pod in namespace $namespace"
+    echo "========================================" >> "$filename"
+    kubectl describe pod "$pod" -n "$namespace" >> "$filename"
+  done
+}
+
+kube_pods_dump_all_logs() {
   local pods
   local namespace="$1"
   pods=$(kubectl get pods -n "$namespace" --no-headers -o custom-columns=":metadata.name")
@@ -43,7 +61,7 @@ kube_dump_all_logs_from_pods() {
   done
 }
 
-kube_delete_all_pods() {
+kube_pods_delete_all() {
   local namespace="$1"
   if [[ -z "$namespace" ]]; then
     echo "Usage: ${FUNCNAME[0]} <namespace>"
@@ -53,20 +71,20 @@ kube_delete_all_pods() {
 }
 
 
-kube_get_pods_by_age() {
+kube_pods_get_by_age() {
   local namespace=${1:-default}
   kubectl get pod --namespace "$namespace" --sort-by=.metadata.creationTimestamp
 }
 
-kube_get_pod_termination_reason() {
+kube_pods_get_termination_reason() {
   reason=$1
   kubectl get pod "$reason" -o go-template="{{range .status.containerStatuses}}{{.lastState.terminated.message}}{{end}}"
 }
 
-kube_get_pod_failed() {
+kube_pods_get_failed() {
   kubectl get pods --field-selector=status.phase=Failed "$@"
 }
 
-kube_show_pods_total_by_namespace() {
+kube_pods_show_total_by_namespace() {
   kubectl get pods --all-namespaces -o custom-columns='NAMESPACE:.metadata.namespace'  | sort | uniq -c | sort -rn
 }
