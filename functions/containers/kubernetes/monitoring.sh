@@ -8,7 +8,7 @@ else
 fi
 prevent_to_execute_directly
 
-alias kube_get_events_all="kubectl get events --sort-by=.metadata.creationTimestamp"
-alias kube_get_events_with_warn="kubectl get events --field-selector type=Warning --sort-by=.metadata.creationTimestamp"
+alias kube_events_get_all="kubectl get events --sort-by=.metadata.creationTimestamp"
+alias kube_events_get_with_warn="kubectl get events --field-selector type=Warning --sort-by=.metadata.creationTimestamp"
 
-alias kube_get_status_metric_server="kubectl get --raw '/apis/metrics.k8s.io/v1beta1/nodes' | jq ."
+alias kube_metric_server_status="kubectl get --raw '/apis/metrics.k8s.io/v1beta1/nodes' | jq ."
