@@ -8,17 +8,28 @@ else
 fi
 prevent_to_execute_directly
 
+_kube_get_namespace() {
+  local namespace="$1"
+  if [ -z "$namespace" ]; then
+    namespace=$(kubectl config view --minify --output 'jsonpath={..namespace}')
+    echo "No namespace provided, using current context namespace: $namespace"
+  else
+    echo "Using namespace: $namespace"
+  fi
+}
+
 ## Generic
-kube_get_all_resources() {
-  namespace=${1:-default}
+kube_resources_get_all() {
+  local namespace && namespace=$(_kube_get_namespace "$1")
   shift
+
   echo "== Show all resources created in namespace: $namespace"
   kubectl api-resources --verbs=list --namespaced -o name |
     xargs -n 1 kubectl get --show-kind --ignore-not-found -n "$namespace" "$@"
 }
 
 ## Run command on multiple namespace at once within the same cluster
-kube_run_command_multiple_namespaces() {
+kube_cmd_run_in_multiple_namespaces() {
   if [ "$#" -lt 2 ]; then
     echo "Error: Invalid number of parameters. Usage: kube_cmd_many <kubectl_command> <namespace1> [<namespace2> ...]"
     return 1
@@ -35,7 +46,7 @@ kube_run_command_multiple_namespaces() {
   done
 }
 
-kube_get_resource_with_custom_column_namespace() {
+kube_resource_get_by_name_in_all_namespaces() {
   local recourceName="$1"
 
   if [[ -z "$recourceName" ]]; then
@@ -64,7 +75,7 @@ kube_get_resource_with_custom_column_namespace() {
 # Parameters:
 #   <kubectl_command> - The kubectl command to run on each cluster.
 #                      Make sure to enclose it in quotes if it contains spaces or special characters.
-kube_cmd_clusters() {
+kube_cmd_run_in_multiple_clusters() {
   local kubectl_cmd=( "$@" )
   local config_file="$HOME/.kube/clusters.conf"
 
