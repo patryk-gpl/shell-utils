@@ -12,8 +12,8 @@ fi
 for folder in *; do
   if [[ -d "$folder/.git" ]]; then
     cd "$folder" || {
-        echo "Failed to enter $folder"
-        exit 1
+      echo "Failed to enter $folder"
+      exit 1
     }
 
     if [[ -n "$branch" ]]; then
