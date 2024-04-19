@@ -33,45 +33,45 @@ git_folder_size() {
 }
 
 git_get_repo_urls_recursive() {
-    if [[ "$#" -eq "0" ]]; then
-        echo "Error: Root directory not provided."
-        return 1
-    fi
+  if [[ "$#" -eq "0" ]]; then
+    echo "Error: Root directory not provided."
+    return 1
+  fi
 
-    local root_dir="$1"
-    local output_file="git_repo_list.txt"
+  local root_dir="$1"
+  local output_file="git_repo_list.txt"
 
-    traverse_directories() {
-        local dir="$1"
-        if git -C "$dir" rev-parse --is-inside-work-tree &> /dev/null; then
-            remote=$(git -C "$dir" remote)
-            remote_url=$(git -C "$dir" remote get-url "$remote" 2>/dev/null)
-            exit_code=$?
-            if [[ $exit_code -eq 0 ]]; then
-                echo "$remote_url" >> "$output_file"
-            else
-                echo "Error retrieving remote origin URL for: $dir" >&2
-            fi
+  traverse_directories() {
+    local dir="$1"
+    if git -C "$dir" rev-parse --is-inside-work-tree &>/dev/null; then
+      remote=$(git -C "$dir" remote)
+      remote_url=$(git -C "$dir" remote get-url "$remote" 2>/dev/null)
+      exit_code=$?
+      if [[ $exit_code -eq 0 ]]; then
+        echo "$remote_url" >>"$output_file"
+      else
+        echo "Error retrieving remote origin URL for: $dir" >&2
+      fi
 
-            if [[ -f "$dir/.meta" ]]; then
-                for item in "$dir"/*; do
-                    if [[ -d "$item" ]]; then
-                        traverse_directories "$item"
-                    fi
-                done
-            fi
-        else
-            for item in "$dir"/*; do
-                if [[ -d "$item" ]]; then
-                    traverse_directories "$item"
-                fi
-            done
+      if [[ -f "$dir/.meta" ]]; then
+        for item in "$dir"/*; do
+          if [[ -d "$item" ]]; then
+            traverse_directories "$item"
+          fi
+        done
+      fi
+    else
+      for item in "$dir"/*; do
+        if [[ -d "$item" ]]; then
+          traverse_directories "$item"
         fi
-    }
+      done
+    fi
+  }
 
-    traverse_directories "$root_dir" > "$output_file"
+  traverse_directories "$root_dir" >"$output_file"
 
-    echo -e "\n== List of retrieved repository URLs stored in: $output_file =="
+  echo -e "\n== List of retrieved repository URLs stored in: $output_file =="
 }
 
 git_cmd_recursive() {

@@ -45,8 +45,8 @@ function kube_pods_describe_all() {
 
   for pod in $pods; do
     echo "Describe pod $pod in namespace $namespace"
-    echo "========================================" >> "$filename"
-    kubectl describe pod "$pod" -n "$namespace" >> "$filename"
+    echo "========================================" >>"$filename"
+    kubectl describe pod "$pod" -n "$namespace" >>"$filename"
   done
 }
 
@@ -56,7 +56,7 @@ kube_pods_dump_all_logs() {
   pods=$(kubectl get pods -n "$namespace" --no-headers -o custom-columns=":metadata.name")
 
   for pod in $pods; do
-    kubectl logs -n "$namespace" "$pod" > "${pod}.log"
+    kubectl logs -n "$namespace" "$pod" >"${pod}.log"
     echo "Logs for pod $pod dumped to ${pod}.log"
   done
 }
@@ -69,7 +69,6 @@ kube_pods_delete_all() {
     kubectl delete pods --all -n "$namespace"
   fi
 }
-
 
 kube_pods_get_by_age() {
   local namespace=${1:-default}
@@ -86,5 +85,5 @@ kube_pods_get_failed() {
 }
 
 kube_pods_show_total_by_namespace() {
-  kubectl get pods --all-namespaces -o custom-columns='NAMESPACE:.metadata.namespace'  | sort | uniq -c | sort -rn
+  kubectl get pods --all-namespaces -o custom-columns='NAMESPACE:.metadata.namespace' | sort | uniq -c | sort -rn
 }

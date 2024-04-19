@@ -14,22 +14,22 @@ function tdebugOff() {
 }
 
 function tfmt() {
-	terraform fmt $(git rev-parse --show-toplevel) "$@"
+  terraform fmt $(git rev-parse --show-toplevel) "$@"
 }
 
 function tplan() {
-	tfmt
-	terraform plan -no-color -out=project.tfplan "$@"
+  tfmt
+  terraform plan -no-color -out=project.tfplan "$@"
 }
 
 function tapply() {
-	tfmt
-	terraform apply -no-color project.tfplan "$@"
+  tfmt
+  terraform apply -no-color project.tfplan "$@"
 }
 
 function tdestroy() {
-	tfmt
-	terraform destroy -no-color "$@"
+  tfmt
+  terraform destroy -no-color "$@"
 }
 
 #############################################################################################
@@ -40,14 +40,14 @@ function tdestroy() {
 #  None
 #############################################################################################
 function tinit() {
-	if [[ -z "$TERRAFORM_STORAGE_ACCESS_KEY" ]]; then
-	  echo "TERRAFORM_STORAGE_ACCESS_KEY environment variable not set. Aborting.."
-	fi
-	tfmt
-	terraform init -backend-config="access_key=$TERRAFORM_STORAGE_ACCESS_KEY" -upgrade "$@"
+  if [[ -z "$TERRAFORM_STORAGE_ACCESS_KEY" ]]; then
+    echo "TERRAFORM_STORAGE_ACCESS_KEY environment variable not set. Aborting.."
+  fi
+  tfmt
+  terraform init -backend-config="access_key=$TERRAFORM_STORAGE_ACCESS_KEY" -upgrade "$@"
 }
 
 function toutput() {
-	tfmt
-	terraform output -no-color "$@"
+  tfmt
+  terraform output -no-color "$@"
 }

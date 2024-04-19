@@ -16,7 +16,7 @@ trivy_scan_local_docker_images() {
     return 1
   fi
 
-  docker images --format "{{.Repository}}:{{.Tag}}" \
-    | grep "^$prefix" \
-    | xargs -I {} bash -c 'echo "Scanning image: {}"; trivy image --scanners misconfig {}'
+  docker images --format "{{.Repository}}:{{.Tag}}" |
+    grep "^$prefix" |
+    xargs -I {} bash -c 'echo "Scanning image: {}"; trivy image --scanners misconfig {}'
 }
