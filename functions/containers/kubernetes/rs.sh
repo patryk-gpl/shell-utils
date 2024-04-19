@@ -8,7 +8,6 @@ else
 fi
 prevent_to_execute_directly
 
-
 ## Replica Sets
 
 kube_rs_delete() {

@@ -10,39 +10,39 @@ prevent_to_execute_directly
 
 # Create a mirror of the web page locally
 mirror_web_site() {
-    if [ -z "$1" ]; then
-        echo "Error: No URL provided. Please provide a URL as an argument."
-        return 1
+  if [ -z "$1" ]; then
+    echo "Error: No URL provided. Please provide a URL as an argument."
+    return 1
+  fi
+
+  url=$1
+  stripped_url="${url#*//}"  # Remove protocol
+  fqdn="${stripped_url%%/*}" # Remove context path
+  url="https://$fqdn"
+
+  logFile="download_${fqdn}.log"
+
+  check_and_remove_empty_file() {
+    local filename="$1"
+    if [ -e "$filename" ]; then
+      if [ -s "$filename" ]; then
+        echo "File $filename is not empty."
+      else
+        rm "$filename"
+      fi
     fi
+  }
 
-    url=$1
-    stripped_url="${url#*//}" # Remove protocol
-    fqdn="${stripped_url%%/*}" # Remove context path
-    url="https://$fqdn"
+  show_stats() {
+    local domain="$1"
+    num_files=$(find "$domain" -type f -print | wc -l)
+    num_dirs=$(find "$domain" -type d -print | wc -l)
+    echo -e "Downloaded directories:\t$num_dirs"
+    echo -e "Downloaded files:\t$num_files"
+  }
 
-    logFile="download_${fqdn}.log"
-
-    check_and_remove_empty_file() {
-        local filename="$1"
-        if [ -e "$filename" ]; then
-            if [ -s "$filename" ]; then
-                echo "File $filename is not empty."
-            else
-                rm "$filename"
-            fi
-        fi
-    }
-
-    show_stats() {
-        local domain="$1"
-        num_files=$(find "$domain" -type f -print | wc -l)
-        num_dirs=$(find "$domain" -type d -print | wc -l)
-        echo -e "Downloaded directories:\t$num_dirs"
-        echo -e "Downloaded files:\t$num_files"
-    }
-
-    echo "Starting wget: $url"
-    wget \
+  echo "Starting wget: $url"
+  wget \
     --recursive \
     --level=1 \
     --convert-links \
@@ -56,6 +56,6 @@ mirror_web_site() {
     -a "$logFile" \
     "$url"
 
-    check_and_remove_empty_file "$logFile"
-    show_stats "$fqdn"
+  check_and_remove_empty_file "$logFile"
+  show_stats "$fqdn"
 }

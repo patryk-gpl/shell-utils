@@ -76,7 +76,7 @@ kube_resource_get_by_name_in_all_namespaces() {
 #   <kubectl_command> - The kubectl command to run on each cluster.
 #                      Make sure to enclose it in quotes if it contains spaces or special characters.
 kube_cmd_run_in_multiple_clusters() {
-  local kubectl_cmd=( "$@" )
+  local kubectl_cmd=("$@")
   local config_file="$HOME/.kube/clusters.conf"
 
   if [ ! -f "$config_file" ]; then
@@ -96,5 +96,5 @@ kube_cmd_run_in_multiple_clusters() {
       bash -c "kubectl --context='$cluster_name' $kubectl_cmd"
       echo
     fi
-  done < "$config_file"
+  done <"$config_file"
 }
