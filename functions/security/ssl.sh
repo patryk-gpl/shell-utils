@@ -34,8 +34,8 @@ ssl_fetch_fullchain() {
   fi
   output_file="$url.pem"
 
-  openssl s_client -showcerts -connect "$url" </dev/null 2>/dev/null \
-  | awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/' > "$output_file"
+  openssl s_client -showcerts -connect "$url" </dev/null 2>/dev/null |
+    awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/' >"$output_file"
 
   echo "SSL certificate saved to $output_file"
   echo "Number of saved certificate in the chain: $(grep -c 'BEGIN CERTIFICATE' "$output_file")"

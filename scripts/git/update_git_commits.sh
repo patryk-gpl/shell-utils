@@ -20,7 +20,7 @@ while getopts ":r:" opt; do
       ;;
   esac
 done
-shift $((OPTIND -1))
+shift $((OPTIND - 1))
 
 # Check required arguments
 if [[ $# -ne 4 ]]; then
@@ -40,7 +40,7 @@ echo "Apply settings: old_name=\"$old_name\" old_email=\"$old_email\" new_name=\
 [[ -z $range ]] && range="-- --all"
 
 # Filter Git history
-if !  git filter-branch --force --env-filter "
+if ! git filter-branch --force --env-filter "
 if [ \"\$GIT_COMMITTER_EMAIL\" = \"$old_email\" ] || [ \"\$GIT_COMMITTER_NAME\" = \"$old_name\" ]; then
     echo \"Updating GIT_COMMITTER_NAME='\$GIT_COMMITTER_NAME' => '$new_name' and GIT_COMMITTER_EMAIL='\$GIT_COMMITTER_EMAIL' => '$new_email'\"
     export GIT_COMMITTER_NAME=\"$new_name\"

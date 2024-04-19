@@ -12,5 +12,8 @@ fi
 prevent_to_execute_directly
 
 az_extension_update_all() {
-  az extension list --query "[].name" --output tsv | while read -r extension; do echo "Updating az extension $extension" ; az extension update --name "$extension" 2>&1 | grep -v "Use --debug for more information"; done
+  az extension list --query "[].name" --output tsv | while read -r extension; do
+    echo "Updating az extension $extension"
+    az extension update --name "$extension" 2>&1 | grep -v "Use --debug for more information"
+  done
 }
