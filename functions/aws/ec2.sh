@@ -11,10 +11,10 @@ aws_ec2_status() {
 
   echo "State of the AWS EC2 instances:" "${instance_ids[@]}"
   aws ec2 describe-instances --instance-ids "${instance_ids[@]}" \
-  --query 'Reservations[].Instances[].{Name: Tags[?Key=="Name"].Value | [0], State: State.Name}' --output table
+    --query 'Reservations[].Instances[].{Name: Tags[?Key=="Name"].Value | [0], State: State.Name}' --output table
 }
 
-aws_ec2_start(){
+aws_ec2_start() {
   local instance_ids=("$@")
 
   if [[ ${#instance_ids[@]} -eq 0 ]]; then
@@ -26,7 +26,7 @@ aws_ec2_start(){
   aws ec2 start-instances --instance-ids "${instance_ids[@]}" --output json | jq .
 }
 
-aws_ec2_stop(){
+aws_ec2_stop() {
   local instance_ids=("$@")
 
   if [[ ${#instance_ids[@]} -eq 0 ]]; then
@@ -46,14 +46,14 @@ aws_ec2_restart_instance() {
   fi
 
   state=$(aws ec2 describe-instances --instance-ids "$instance_id" \
-  --query 'Reservations[].Instances[].State.Name' --output text)
+    --query 'Reservations[].Instances[].State.Name' --output text)
 
   if [[ "$state" == "running" ]]; then
     echo "Do you want to reboot the AWS EC2 instance $instance_id? (y/n)"
     read -r answer
     if [[ "$answer" != "y" ]]; then
-        echo "The AWS EC2 instance $instance_id was not rebooted."
-        return 0
+      echo "The AWS EC2 instance $instance_id was not rebooted."
+      return 0
     else
       aws ec2 reboot-instances --instance-ids "$instance_id" | jq .
     fi
@@ -61,8 +61,8 @@ aws_ec2_restart_instance() {
     echo "The AWS EC2 instance $instance_id is not running. Do you want to start it? (y/n)"
     read -r answer
     if [[ "$answer" != "y" ]]; then
-        echo "The AWS EC2 instance $instance_id was not started."
-        return 0
+      echo "The AWS EC2 instance $instance_id was not started."
+      return 0
     fi
     aws_ec2_start "$instance_id"
   fi
@@ -77,7 +77,7 @@ aws_ec2_get_instace_id_by_ip() {
   fi
 
   aws ec2 describe-instances --filters Name=private-ip-address,Values="$ip_address" \
-  --query 'Reservations[].Instances[].InstanceId' --output text
+    --query 'Reservations[].Instances[].InstanceId' --output text
 }
 
 aws_ec2_instance_network_details() {
@@ -89,5 +89,5 @@ aws_ec2_instance_network_details() {
   fi
 
   aws ec2 describe-instances --instance-ids "$instance_id" \
-  --query 'Reservations[].Instances[].{PublicIpAddress: PublicIpAddress, PrivateIpAddress: PrivateIpAddress, SubnetId: SubnetId, VpcId: VpcId, NetworkInterfaces: NetworkInterfaces}'
+    --query 'Reservations[].Instances[].{PublicIpAddress: PublicIpAddress, PrivateIpAddress: PrivateIpAddress, SubnetId: SubnetId, VpcId: VpcId, NetworkInterfaces: NetworkInterfaces}'
 }

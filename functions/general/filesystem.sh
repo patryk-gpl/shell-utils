@@ -13,7 +13,7 @@ convert_tabs_to_spaces() {
   local file=$1
   if [[ -f $file ]]; then
     beforeTabs=$(grep $'\t' -o "$file" | wc -l | tr -d '[:space:]')
-    expand -t 2 "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+    expand -t 2 "$file" >"${file}.tmp" && mv "${file}.tmp" "$file"
     echo "Number of tabs converted to spaces in $file: $beforeTabs"
   else
     echo "File $file does not exist."
@@ -74,10 +74,10 @@ file_dump_content() {
 
   {
     echo "Folder structure: "
-    tree -f  --noreport "$root_dir"
+    tree -f --noreport "$root_dir"
     echo
     echo "Content of all files from the folder and sub-folders: "
     find "$root_dir" -type f -exec sh -c 'echo "Filename: $1"; cat "$1"; echo' _ {} \;
     echo "Wait for the next prompt. Confirm with DONE."
-  } > "$output_file"
+  } >"$output_file"
 }
