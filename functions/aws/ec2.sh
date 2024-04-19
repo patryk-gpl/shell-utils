@@ -79,3 +79,15 @@ aws_ec2_get_instace_id_by_ip() {
   aws ec2 describe-instances --filters Name=private-ip-address,Values="$ip_address" \
   --query 'Reservations[].Instances[].InstanceId' --output text
 }
+
+aws_ec2_instance_network_details() {
+  local instance_id="$1"
+
+  if [[ -z "$instance_id" ]]; then
+    echo "Usage: aws_ec2_instance_network_details <instance_id>"
+    return 1
+  fi
+
+  aws ec2 describe-instances --instance-ids "$instance_id" \
+  --query 'Reservations[].Instances[].{PublicIpAddress: PublicIpAddress, PrivateIpAddress: PrivateIpAddress, SubnetId: SubnetId, VpcId: VpcId, NetworkInterfaces: NetworkInterfaces}'
+}
