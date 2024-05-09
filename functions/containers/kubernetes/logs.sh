@@ -13,17 +13,21 @@ kube_logs_dump_from_pod_containers_with_filter() {
   local pod_name="$2"
   local filter="$3"
 
-  if [[ -z "$pod_name" || -z "$namespace" || -z "$filter" ]]; then
-    echo "Usage: ${FUNCNAME[0]} <namespace> <pod_name> <filter>"
+  if [[ -z "$pod_name" || -z "$namespace" ]]; then
+    echo "Usage: ${FUNCNAME[0]} <namespace> <pod_name> [filter]"
     return 1
   fi
 
   local containers
-  containers=$(kubectl get pod "$pod_name" -n "$namespace" -o=jsonpath='{.spec.containers[*].name}')
+  containers=$(kubectl get pod "$pod_name" -n "$namespace" -o jsonpath='{.spec.containers[*].name} {.spec.initContainers[*].name}')
 
   for container in $containers; do
     echo -e "${GREEN}== Logs for container $container in pod $pod_name ==${RESET}"
-    kubectl logs -n "$namespace" "$pod_name" -c "$container" | grep -E -i "$filter"
+    if [[ -n "$filter" ]]; then
+      kubectl logs -n "$namespace" "$pod_name" -c "$container" | grep -E -i "$filter"
+    else
+      kubectl logs -n "$namespace" "$pod_name" -c "$container"
+    fi
   done
 }
 
