@@ -9,6 +9,37 @@ fi
 
 prevent_to_execute_directly
 
+function docker_scan_images_cves {
+  local image filename
+  local docker_cmd="docker"
+
+  # Allow overriding the docker command or options (e.g., using sudo)
+  if [[ -n "$1" ]]; then
+    docker_cmd="$1"
+  fi
+
+  local images
+  if ! images=$($docker_cmd images --format "{{.Repository}}:{{.Tag}}"); then
+    echo "Failed to list Docker images." >&2
+    return 1
+  fi
+
+  if [[ -z "$images" ]]; then
+    echo "No Docker images found." >&2
+    return 2
+  fi
+
+  echo "$images" | while IFS= read -r image; do
+    # Replace '/' with '_' for filenames
+    filename=${image//\//_}
+    echo "Checking CVEs for image: $image. Save report to $filename.cve"
+
+    if ! $docker_cmd scout cves "$image" > "$filename.cve"; then
+      echo "Failed to scan $image for CVEs." >&2
+    fi
+  done
+}
+
 # Get a list of authenticated Docker registries
 docker_auth_list() {
   if [[ -f ~/.docker/config.json ]]; then
