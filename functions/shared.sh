@@ -21,6 +21,16 @@ MAGENTA="\033[35m"
 CYAN="\033[36m"
 WHITE="\033[37m"
 
+show_message_with_different_colours() {
+  echo -e "${RED}This is red text${RESET}"
+  echo -e "${GREEN}This is green text${RESET}"
+  echo -e "${YELLOW}This is yellow text${RESET}"
+  echo -e "${BLUE}This is blue text${RESET}"
+  echo -e "${MAGENTA}This is magenta text${RESET}"
+  echo -e "${CYAN}This is cyan text${RESET}"
+  echo -e "${WHITE}This is white text${RESET}"
+}
+
 # Return the OS type
 find_os_type() {
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
