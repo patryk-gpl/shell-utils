@@ -8,6 +8,39 @@ else
 fi
 prevent_to_execute_directly
 
+
+remove_trailing_newlines_from_files_recursively() {
+  local path="$1"
+  if [[ -z $path ]]; then
+    echo "Error: Path not provided."
+    return 1
+  fi
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    find "$path" -type f -exec sed -i '' -e :a -e '/^$/{N;ba' -e '}' {} \;
+  else
+    find "$path" -type f -exec sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' {} \;
+  fi
+}
+
+remove_trailing_spaces_from_files_recursively() {
+  local path="$1"
+  if [[ -z $path ]]; then
+    echo "Error: Path not provided."
+    return 1
+  fi
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    find "$path" -type f -exec sed -i '' -e 's/[[:space:]]*$//' {} \;
+  else
+    find "$path" -type f -exec sed -i -e 's/[[:space:]]*$//' {} \;
+  fi
+}
+
+remove_trailing_chars() {
+  local path="$1"
+  remove_trailing_newlines_from_files_recursively "$path"
+  remove_trailing_spaces_from_files_recursively "$path"
+}
+
 # Convert tabs to spaces in a file and print the number of tabs converted
 convert_tabs_to_spaces() {
   local file=$1
