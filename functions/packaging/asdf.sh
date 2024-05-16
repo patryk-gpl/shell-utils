@@ -9,18 +9,18 @@ fi
 prevent_to_execute_directly
 
 function asdf_plugin_show_install_script() {
-    local plugin_name=$1
-    local bin_path="$HOME/.asdf/plugins/$plugin_name/bin/install"
+  local plugin_name=$1
+  local bin_path="$HOME/.asdf/plugins/$plugin_name/bin/install"
 
-    if [[ -f $bin_path ]]; then
-        echo "== Content of the install script for plugin '$plugin_name' =="
-        if command -v bat &> /dev/null; then
-              bat "$bin_path"
-            else
-              cat "$bin_path"
-        fi
+  if [[ -f $bin_path ]]; then
+    echo "== Content of the install script for plugin '$plugin_name' =="
+    if command -v bat &>/dev/null; then
+      bat "$bin_path"
     else
-        echo "Error: Install script for plugin '$plugin_name' does not exist."
-        return 1
+      cat "$bin_path"
     fi
+  else
+    echo "Error: Install script for plugin '$plugin_name' does not exist."
+    return 1
+  fi
 }
