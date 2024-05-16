@@ -42,13 +42,11 @@ kube_logs_dump_from_all_pods() {
   local pods
   pods=$(kubectl get pods -n "$namespace" --no-headers -o custom-columns=":metadata.name")
 
-  for pod in $pods;
-  do
+  for pod in $pods; do
     echo "Dumping logs for pod $pod, namespace $namespace..."
     containers=$(kubectl get pod "$pod" -n "$namespace" -o jsonpath='{.spec.containers[*].name} {.spec.initContainers[*].name}')
-    for container in $containers
-    do
-      kubectl logs -n "$namespace" "$pod" -c "$container" > "$namespace_$pod_${container}.log"
+    for container in $containers; do
+      kubectl logs -n "$namespace" "$pod" -c "$container" >"$namespace_$pod_${container}.log"
     done
   done
 }
