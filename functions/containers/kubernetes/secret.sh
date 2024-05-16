@@ -30,12 +30,11 @@ kube_secret_dump_keys_to_stdout() {
   fi
 
   local secret_json
-  secret_json=$(kubectl get secret "$secret_name" -n "$namespace" -o json )
+  secret_json=$(kubectl get secret "$secret_name" -n "$namespace" -o json)
   local keys
   keys="$(echo "$secret_json" | jq -r '.data | keys[]')"
 
-  for key in $keys
-  do
+  for key in $keys; do
     local value
     value=$(echo "$secret_json" | jq -r --arg key "$key" '.data[$key]' | base64 --decode | tr -d '\0')
 
@@ -58,16 +57,15 @@ kube_secret_dump_keys_to_file() {
   fi
 
   local secret_json
-  secret_json=$(kubectl get secret "$secret_name" -n "$namespace" -o json )
+  secret_json=$(kubectl get secret "$secret_name" -n "$namespace" -o json)
   local keys
   keys="$(echo "$secret_json" | jq -r '.data | keys[]')"
 
-  for key in $keys
-  do
+  for key in $keys; do
     local value
     value=$(echo "$secret_json" | jq -r --arg key "$key" '.data[$key]')
 
     echo "Dumping $key to file"
-    echo "$value" | base64 -d > "$key"
+    echo "$value" | base64 -d >"$key"
   done
 }
