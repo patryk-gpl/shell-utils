@@ -45,3 +45,49 @@ convert_snake_case_to_upper_snake_case() {
 convert_upper_snake_case_to_snake_case() {
   echo "$1" | tr '[:upper:]' '[:lower:]'
 }
+
+# Convert tabs to spaces in a file and print the number of tabs converted
+convert_tabs_to_spaces() {
+  local file=$1
+  if [[ -f $file ]]; then
+    beforeTabs=$(grep $'\t' -o "$file" | wc -l | tr -d '[:space:]')
+    expand -t 2 "$file" >"${file}.tmp" && mv "${file}.tmp" "$file"
+    echo "Number of tabs converted to spaces in $file: $beforeTabs"
+  else
+    echo "File $file does not exist."
+  fi
+}
+
+remove_trailing_newlines_from_files_recursively() {
+  local folder="$1"
+  if [[ -z $folder ]]; then
+    echo "Error: folder not provided."
+    return 1
+  fi
+  local common_find_options=(-type f -not -path '*/.git/*' -not -name '*.png' -not -name '*.jks' -not -name '*.jpg' -not -name '*.gif' -not -name '*.pdf')
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    find "$folder" "${common_find_options[@]}" -exec sed -i '' -e :a -e '/^$/{N;ba' -e '}' {} \;
+  else
+    find "$folder" "${common_find_options[@]}" -exec sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' {} \;
+  fi
+}
+
+remove_trailing_spaces_from_files_recursively() {
+  local folder="$1"
+  if [[ -z $folder ]]; then
+    echo "Error: folder not provided."
+    return 1
+  fi
+  local common_find_options=(-type f -not -path '*/.git/*' -not -name '*.png' -not -name '*.jks' -not -name '*.jpg' -not -name '*.gif' -not -name '*.pdf')
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    find "$folder" "${common_find_options[@]}" -exec sed -i '' -e 's/[[:space:]]*$//' {} \;
+  else
+    find "$folder" "${common_find_options[@]}" -exec sed -i -e 's/[[:space:]]*$//' {} \;
+  fi
+}
+
+remove_trailing_chars() {
+  local folder="$1"
+  remove_trailing_newlines_from_files_recursively "$folder"
+  remove_trailing_spaces_from_files_recursively "$folder"
+}
