@@ -4,26 +4,34 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
-      - feature/*
+    - main
+    - feature/*
     paths-ignore:
-      - "**/*.md"
+    - "**/*.md"
 
 jobs:
   script-validation:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Check Executability of Shell Scripts
-        run: |
-          for file in $(find functions -type f -name "*.sh")
-          do
-            if [ -x "$file" ]; then
-              echo "Error: $file is executable" && exit 1
-            fi
-          done
+    - name: Check whether shell functions are executable
+      run: |
+        for file in $(find functions -type f -name "*.sh")
+        do
+          if [ -x "$file" ]; then
+            echo "Error: $file is executable" && exit 1
+          fi
+        done
+
+    - name: Install Bats
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bats
+
+    - name: Run Bats tests
+      run: bats -r tests/
 
   shellcheck:
     needs: script-validation
