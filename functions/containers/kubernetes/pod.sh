@@ -13,7 +13,30 @@ kube_list_image_names_from_pods() {
   kubectl get pods -n "$namespace" -o=jsonpath="{range .items[*].spec.containers[*]}{.image}{'\n'}{end}" "$@" | sort -u
 }
 
-function kube_pods_describe_all() {
+kube_pods_get_cpu_request_limits_details() {
+  kubectl get pods -A -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[*].resources.requests.cpu}{"\n"}{end}'
+}
+
+kube_pods_get_memory_request_limits_details() {
+  kubectl get pods -A -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[*].resources.requests.memory}{"\n"}{end}'
+}
+
+kube_pods_get_memory_request_limits_summary() {
+  kubectl get pods -A -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[*].resources.requests.memory}{"\n"}{end}' |
+    awk '{for(i=2; i<=NF; i++) if($i ~ /Mi$/) {sub(/Mi$/, "", $i); mem+=$i} else if($i ~ /Gi$/) {sub(/Gi$/, "", $i); mem+=$i*1024} else if($i ~ /Ki$/) {sub(/Ki$/, "", $i); mem+=$i/1024} else {mem+=$i}} END {print "Total memory requests: " mem "Mi"}'
+}
+
+kube_pods_get_cpu_request_limits_summary() {
+  kubectl get pods -A -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[*].resources.requests.cpu}{"\n"}{end}' |
+    awk '{for(i=2; i<=NF; i++) if($i ~ /m$/) {sub(/m$/, "", $i); cpu+=($i/1000)} else {cpu+=$i}} END {print "Total CPU requests: " cpu}'
+}
+
+kube_pods_get_cpu_and_memory_requests_limits_summary() {
+  kube_pods_get_cpu_request_limits_summary
+  kube_pods_get_memory_request_limits_summary
+}
+
+kube_pods_describe_all() {
   namespace=$1
   if [ -z "$namespace" ]; then
     echo "Usage: kube_pods_describe_all <namespace>"
