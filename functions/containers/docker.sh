@@ -18,17 +18,15 @@ docker_auth_list() {
   fi
 }
 
-# Remove all local Docker images with a specific prefix
-docker_image_remove_with_prefix() {
-  local prefix="$1"
+docker_image_remove_with_prefix_or_tag() {
+  local prefix_or_tag="$1"
 
-  if [ -z "$prefix" ]; then
-    echo "Usage: $0 <prefix>"
-    echo "Prefix is required"
+  if [ -z "$prefix_or_tag" ]; then
+    echo "Usage: $0 <prefix_or_tag>"
+    echo "Prefix or tag is required"
     return 1
   fi
-
-  docker images --format "{{.Repository}}:{{.Tag}}" | grep "^$prefix" | xargs -I {} docker rmi {}
+  docker images --format "{{.Repository}}:{{.Tag}}" | grep -E "^$prefix_or_tag|:$prefix_or_tag$" | xargs -I {} docker rmi {}
 }
 
 # Return status of Docker Engine daemon
