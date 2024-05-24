@@ -19,9 +19,16 @@ kube_logs_dump_from_pod_containers_with_filter() {
   fi
 
   local containers
-  containers=$(kubectl get pod "$pod_name" -n "$namespace" -o jsonpath='{.spec.containers[*].name} {.spec.initContainers[*].name}')
+  containers=$(kubectl get pod "$pod_name" -n "$namespace" -o jsonpath='{.spec.containers[*].name} {.spec.initContainers[*].name}' | xargs)
 
-  for container in $containers; do
+  local -a read_params=("-r" "-a")
+  if [[ $SHELL == *"zsh"* ]]; then
+    read_params=("-r" "-A")
+  fi
+  # shellcheck disable=SC2162
+  IFS=' ' read "${read_params[@]}" container_array <<<"$containers"
+
+  for container in "${container_array[@]}"; do
     echo -e "${GREEN}== Logs for container $container in pod $pod_name ==${RESET}"
     if [[ -n "$filter" ]]; then
       kubectl logs -n "$namespace" "$pod_name" -c "$container" | grep -E -i "$filter"
@@ -42,11 +49,22 @@ kube_logs_dump_from_all_pods() {
   local pods
   pods=$(kubectl get pods -n "$namespace" --no-headers -o custom-columns=":metadata.name")
 
-  for pod in $pods; do
-    echo "Dumping logs for pod $pod, namespace $namespace..."
-    containers=$(kubectl get pod "$pod" -n "$namespace" -o jsonpath='{.spec.containers[*].name} {.spec.initContainers[*].name}')
-    for container in $containers; do
-      kubectl logs -n "$namespace" "$pod" -c "$container" >"$namespace_$pod_${container}.log"
+  local -a read_params=("-r" "-a")
+  if [[ $SHELL == *"zsh"* ]]; then
+    read_params=("-r" "-A")
+  fi
+
+  echo "Dumping logs for all pods in namespace $namespace..."
+  while IFS= read -r pod; do
+    echo "Dumping logs for pod $pod..."
+    containers=$(kubectl get pod "$pod" -n "$namespace" -o jsonpath='{.spec.containers[*].name} {.spec.initContainers[*].name}' | xargs)
+
+    # shellcheck disable=SC2162
+    IFS=' ' read "${read_params[@]}" container_array <<<"$containers"
+
+    for container in "${container_array[@]}"; do
+      echo -e "${GREEN}== Logs for container $container in pod $pod ==${RESET}"
+      kubectl logs -n "$namespace" "$pod" -c "$container" >"${namespace}_${pod}_${container}.log"
     done
-  done
+  done <<<"$pods"
 }
