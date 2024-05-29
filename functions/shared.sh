@@ -47,7 +47,7 @@ find_os_type() {
 }
 
 # Check if a tool is installed in the system
-_is_tool_installed() {
+is_installed() {
   tools=("$@")
   for tool in "${tools[@]}"; do
     if ! which "$tool" >/dev/null; then

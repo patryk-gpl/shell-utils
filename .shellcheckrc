@@ -3,5 +3,3 @@ external-sources=true
 
 # Specify the shell to use
 shell=bash
-
-disable=SC2154 # Variable is referenced but not assigned.
