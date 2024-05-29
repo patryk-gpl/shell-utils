@@ -61,11 +61,17 @@ kube_secret_dump_keys_to_file() {
   local keys
   keys="$(echo "$secret_json" | jq -r '.data | keys[]')"
 
+  local file_name="${secret_name}.crt"
+  rm -f "$file_name" 2>/dev/null
+  echo "Dumping keys and values to file: $file_name"
   for key in $keys; do
     local value
-    value=$(echo "$secret_json" | jq -r --arg key "$key" '.data[$key]')
-
-    echo "Dumping $key to file"
-    echo "$value" | base64 -d >"$key"
+    value=$(echo "$secret_json" | jq -r --arg key "$key" '.data[$key]' | base64 --decode | tr -d '\0')
+    is_binary_string="$(printf '%s' "$value" | file -b --mime - | cut -d';' -f1)"
+    if [[ "$is_binary_string" == 'application/octet-stream' ]]; then
+      echo "Key $key contains binary data"
+    fi
+    echo "== $key ==" >>"$file_name"
+    echo "$value" >>"$file_name"
   done
 }
