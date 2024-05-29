@@ -15,7 +15,7 @@ _ssl_parse_cert_file() {
     return 1
   fi
 
-  _is_tool_installed openssl || return 1
+  is_installed openssl || return 1
   if [ ! -f "$cert_file" ]; then
     echo "File $cert_file not found"
     return 1
@@ -25,7 +25,7 @@ _ssl_parse_cert_file() {
 # Main functions
 
 ssl_fetch_fullchain() {
-  _is_tool_installed openssl awk || return 1
+  is_installed openssl awk || return 1
   local url=${1:-}
 
   if [ -z "$url" ]; then
@@ -43,7 +43,7 @@ ssl_fetch_fullchain() {
 
 # Function to fetch SSL certificate from a server
 ssl_fetch_cert() {
-  _is_tool_installed openssl || return 1
+  is_installed openssl || return 1
 
   local url=${1:-}
   local port=${2:-443}
@@ -80,7 +80,7 @@ ssl_show_cert_details() {
 }
 
 ssl_show_cert_headers() {
-  _is_tool_installed openssl awk || return 1
+  is_installed openssl awk || return 1
   _ssl_parse_cert_file "$1" || return 1
 
   echo "== $1 =="
@@ -116,7 +116,7 @@ ssl_create_self_signed_cert() {
     echo "Usage: $0 <domain>"
     return 1
   fi
-  _is_tool_installed openssl || return 1
+  is_installed openssl || return 1
 
   openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$domain".key -out "$domain".crt
 }

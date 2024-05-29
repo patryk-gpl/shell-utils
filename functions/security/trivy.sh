@@ -9,7 +9,7 @@ fi
 prevent_to_execute_directly
 
 trivy_scan_local_docker_images() {
-  _is_tool_installed trivy || return 1
+  is_installed trivy || return 1
   prefix=${1:-}
   if [[ -z "$prefix" ]]; then
     echo "Usage: ${FUNCNAME[0]} <image_prefix>"
