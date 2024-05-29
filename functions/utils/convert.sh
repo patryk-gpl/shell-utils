@@ -64,11 +64,20 @@ remove_trailing_newlines_from_files_recursively() {
     echo "Error: folder not provided."
     return 1
   fi
-  local common_find_options=(-type f -not -path '*/.git/*' -not -name '*.png' -not -name '*.jks' -not -name '*.jpg' -not -name '*.gif' -not -name '*.pdf')
+
+  local ignore_extensions=("png" "jks" "jpg" "gif" "pdf")
+  local ignore_files=()
+  for ext in "${ignore_extensions[@]}"; do
+    ignore_files+=("-not")
+    ignore_files+=("-name")
+    ignore_files+=("*.$ext")
+  done
+  local common_options=(-type f -not -path '*/.git/*' "${ignore_files[@]}")
+
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    find "$folder" "${common_find_options[@]}" -exec sed -i '' -e :a -e '/^$/{N;ba' -e '}' {} \;
+    find "$folder" "${common_options[@]}" -exec sed -i '' -e :a -e '/^$/{N;ba' -e '}' {} \;
   else
-    find "$folder" "${common_find_options[@]}" -exec sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' {} \;
+    find "$folder" "${common_options[@]}" -exec sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' {} \;
   fi
 }
 
@@ -78,11 +87,20 @@ remove_trailing_spaces_from_files_recursively() {
     echo "Error: folder not provided."
     return 1
   fi
-  local common_find_options=(-type f -not -path '*/.git/*' -not -name '*.png' -not -name '*.jks' -not -name '*.jpg' -not -name '*.gif' -not -name '*.pdf')
+
+  local ignore_extensions=("png" "jks" "jpg" "gif" "pdf")
+  local ignore_files=()
+  for ext in "${ignore_extensions[@]}"; do
+    ignore_files+=("-not")
+    ignore_files+=("-name")
+    ignore_files+=("*.$ext")
+  done
+  local common_options=(-type f -not -path '*/.git/*' "${ignore_files[@]}")
+
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    find "$folder" "${common_find_options[@]}" -exec sed -i '' -e 's/[[:space:]]*$//' {} \;
+    find "$folder" "${common_options[@]}" -exec sed -i '' -e 's/[[:space:]]*$//' {} \;
   else
-    find "$folder" "${common_find_options[@]}" -exec sed -i -e 's/[[:space:]]*$//' {} \;
+    find "$folder" "${common_options[@]}" -exec sed -i -e 's/[[:space:]]*$//' {} \;
   fi
 }
 
