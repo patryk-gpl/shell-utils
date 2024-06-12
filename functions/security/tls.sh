@@ -178,7 +178,7 @@ tls_create_self_signed_cert_files() {
   openssl x509 -noout -text -in "$domain.crt"
 }
 
-tls_split_chained_cert_into_files() {
+tls_split_chained_cert_and_keys_into_files() {
   local orig_file=$1
   if [ -z "$orig_file" ]; then
     echo "Usage: $0 <cert_file.pem>"
@@ -188,13 +188,68 @@ tls_split_chained_cert_into_files() {
 
   base_name=$(basename "$orig_file" .crt)
   awk -v base_name="$base_name" '
-  BEGIN {c=0;}
-  /-----BEGIN CERTIFICATE-----/ {c++;out=base_name "_" c ".crt"}
-  out {print >out}' "$orig_file"
+  BEGIN {c=0; k=0; out=""}
+  /-----BEGIN CERTIFICATE-----/ {
+    if (out != "") close(out);
+    c++;
+    out=base_name "_" c ".crt";
+  }
+  /-----BEGIN PRIVATE KEY-----/ {
+    if (out != "") close(out);
+    k++;
+    out=base_name "_" k ".key";
+  }
+  /-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/ {
+    if (out != "") print >out;
+  }
+  /-----BEGIN PRIVATE KEY-----/,/-----END PRIVATE KEY-----/ {
+    if (out != "") print >out;
+  }' "$orig_file"
 
   for file in "$base_name"_*.crt; do
     echo "Certificate file $file header:"
     openssl x509 -noout -subject -issuer -dates -fingerprint -in "$file"
+    openssl x509 -noout -fingerprint -sha256 -in "$file"
     echo
   done
+
+  for file in "$base_name"_*.key; do
+    echo "Private key file $file:"
+    openssl rsa -noout -text -in "$file"
+    echo
+  done
+}
+
+tls_verify_key_matches_cert() {
+  local cert_file="$1"
+  local key_file="$2"
+  _tls_parse_cert_file "$cert_file" || return 1
+
+  if [ -z "$key_file" ]; then
+    echo "Usage: <cert_file.pem> <key_file.pem>"
+    return 1
+  fi
+
+  if [ ! -f "$key_file" ]; then
+    echo "File $key_file not found"
+    return 1
+  fi
+
+  if openssl x509 -noout -modulus -in "$cert_file" | openssl md5; then
+    echo "Certificate modulus:"
+    openssl x509 -noout -modulus -in "$cert_file" | openssl md5
+    echo
+  fi
+
+  if openssl rsa -noout -modulus -in "$key_file" | openssl md5; then
+    echo "Private key modulus:"
+    openssl rsa -noout -modulus -in "$key_file" | openssl md5
+    echo
+  fi
+
+  if openssl x509 -noout -modulus -in "$cert_file" | openssl md5 | grep -q "$(openssl rsa -noout -modulus -in "$key_file" | openssl md5)"; then
+    echo -e "${GREEN}Certificate and private key match${RESET}"
+  else
+    echo -e "${RED}Certificate and private key do not match${RESET}"
+  fi
 }
