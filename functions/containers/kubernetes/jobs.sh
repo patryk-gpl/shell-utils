@@ -23,6 +23,8 @@ kube_jobs_remove_completed() {
     return 0
   else
     echo "Removing completed jobs in namespace: $namespace"
-    kubectl delete job "$jobs" -n "$namespace"
+    for job in $jobs; do
+      kubectl delete job "$job" -n "$namespace"
+    done
   fi
 }
