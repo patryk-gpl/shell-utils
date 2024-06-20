@@ -68,16 +68,29 @@ aws_ec2_restart_instance() {
   fi
 }
 
-aws_ec2_get_instace_id_by_ip() {
+aws_ec2_get_instance_id_by_ip() {
   local ip_address="$1"
 
   if [[ -z "$ip_address" ]]; then
-    echo "Usage: aws_ec2_get_instace_id_by_ip_address <ip_address>"
+    echo "Usage: aws_ec2_get_instance_id_by_ip_address <ip_address>"
     return 1
   fi
 
-  aws ec2 describe-instances --filters Name=private-ip-address,Values="$ip_address" \
-    --query 'Reservations[].Instances[].InstanceId' --output text
+  echo "Looking for an instance with private IP address: $ip_address"
+  instance_id=$(aws ec2 describe-instances --filters "Name=private-ip-address,Values=$ip_address" --query "Reservations[*].Instances[*].InstanceId" --output text)
+
+  if [[ -z "$instance_id" || "$instance_id" == "None" ]]; then
+    echo "No instance found with private IP address: $ip_address"
+    echo "Looking for an instance with public IP address: $ip_address"
+    instance_id=$(aws ec2 describe-instances --filters "Name=ip-address,Values=$ip_address" --query "Reservations[*].Instances[*].InstanceId" --output text)
+  fi
+
+  if [[ -z "$instance_id" || "$instance_id" == "None" ]]; then
+    echo "No instance found with IP address: $ip_address"
+    return 1
+  else
+    echo "Instance ID: $instance_id"
+  fi
 }
 
 aws_ec2_instance_network_details() {
