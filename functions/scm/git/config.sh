@@ -85,10 +85,10 @@ git_config_setup_dual_remote() {
   git config --unset-all remote.private.push
 
   echo "Configuring push for private remote (all branches)..."
-  git config remote.private.push "+refs/heads/*:refs/heads/*"
+  git config remote.private.push "refs/heads/*:refs/heads/*"
 
   echo "Configuring push for origin (non-priv/ branches only)..."
-  git config remote.origin.push "+refs/heads/*:refs/heads/*"
+  git config remote.origin.push "refs/heads/*:refs/heads/*"
   git config --add remote.origin.push "^refs/heads/priv/*"
 
   echo "Setting up push to both remotes by default..."
@@ -118,7 +118,7 @@ git_config_setup_dual_remote() {
   printf "\nBranch configuration:\n"
   git branch -vv
 
-  cat << EOF
+  cat <<EOF
 
 📌 Important Notes:
    • All branches will be pushed to the private remote by default.
