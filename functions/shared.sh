@@ -11,39 +11,31 @@ prevent_to_execute_directly() {
 }
 
 # Colors ANSI escape codes
-RESET="\033[0m"
-BLACK="\033[30m"
-RED="\033[31m"
-GREEN="\033[32m"
-YELLOW="\033[33m"
-BLUE="\033[34m"
-MAGENTA="\033[35m"
-CYAN="\033[36m"
-WHITE="\033[37m"
+# Check if the script has already been sourced
+if [ -z "${_SHARED_SH_SOURCED_+x}" ]; then
+  readonly RESET="\033[0m"
+  readonly BLACK="\033[30m"
+  readonly RED="\033[31m"
+  readonly GREEN="\033[32m"
+  readonly YELLOW="\033[33m"
+  readonly BLUE="\033[34m"
+  readonly MAGENTA="\033[35m"
+  readonly CYAN="\033[36m"
+  readonly WHITE="\033[37m"
 
-show_message_with_different_colours() {
-  echo -e "${RED}This is red text${RESET}"
-  echo -e "${GREEN}This is green text${RESET}"
-  echo -e "${YELLOW}This is yellow text${RESET}"
-  echo -e "${BLUE}This is blue text${RESET}"
-  echo -e "${MAGENTA}This is magenta text${RESET}"
-  echo -e "${CYAN}This is cyan text${RESET}"
-  echo -e "${WHITE}This is white text${RESET}"
-}
+  # Set the flag to indicate the script has been sourced
+  readonly _SHARED_SH_SOURCED_=1
+fi
 
 # Return the OS type
 find_os_type() {
-  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    echo "linux"
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "mac"
-  elif [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
-    echo "windows"
-  elif [[ "$OSTYPE" == "freebsd"* ]]; then
-    echo "linux"
-  else
-    echo "unknown"
-  fi
+  case "$OSTYPE" in
+    linux-gnu*) echo "linux" ;;
+    darwin*) echo "mac" ;;
+    cygwin | msys | win32) echo "windows" ;;
+    freebsd*) echo "freebsd" ;;
+    *) echo "unknown" ;;
+  esac
 }
 
 # Check if tools are installed in the system
