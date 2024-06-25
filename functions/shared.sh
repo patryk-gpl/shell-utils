@@ -46,13 +46,46 @@ find_os_type() {
   fi
 }
 
-# Check if a tool is installed in the system
+# Check if tools are installed in the system
+# Usage: is_installed [-v] tool1 tool2 ...
+# Options:
+#   -v  Verbose mode: print status for each tool
+# Returns: Number of missing tools (0 if all are installed)
 is_installed() {
+  local verbose=false
+  local missing=0
+  local tools=()
+
+  # Parse options
+  while [[ "$1" == -* ]]; do
+    case "$1" in
+      -v | --verbose)
+        verbose=true
+        shift
+        ;;
+      *)
+        echo "Unknown option: $1" >&2
+        return 1
+        ;;
+    esac
+  done
+
   tools=("$@")
+
   for tool in "${tools[@]}"; do
-    if ! which "$tool" >/dev/null; then
-      echo -e "${RED}Error: ${RESET} $tool is not installed"
-      return 1
+    if ! command -v "$tool" &>/dev/null; then
+      if [[ "$verbose" == true ]]; then
+        echo "Error: $tool is not installed" >&2
+      fi
+      ((missing++))
+    elif [[ "$verbose" == true ]]; then
+      echo "OK: $tool is installed"
     fi
   done
+
+  if [[ $missing -gt 0 && "$verbose" == false ]]; then
+    echo "Error: Some required tools are not installed" >&2
+  fi
+
+  return $missing
 }
