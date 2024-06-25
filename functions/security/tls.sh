@@ -8,9 +8,8 @@ else
 fi
 prevent_to_execute_directly
 
-_tls_parse_cert_file() {
+_tls_check_function_params() {
   local cert_file=${1:-}
-  is_installed openssl || return 1
 
   if [ -z "$cert_file" ]; then
     echo "Usage: $0 <cert_file.pem>"
@@ -53,7 +52,8 @@ tls_fetch_cert() {
   fi
 
   echo "Fetching SSL certificate from host=$host, port=$port"
-  local certificate=$(echo | openssl s_client -showcerts -servername "$host" -connect "$host":"$port" 2>/dev/null |
+  local certificate
+  certificate=$(echo | openssl s_client -showcerts -servername "$host" -connect "$host":"$port" 2>/dev/null |
     openssl x509 -outform PEM)
 
   if [ -z "$certificate" ]; then
@@ -69,6 +69,7 @@ tls_fetch_cert() {
 tls_fetch_cert_details() {
   local host=${1:-}
   local port=${2:-443}
+  is_installed openssl || return 1
 
   if [ -z "$host" ]; then
     echo "Usage: $0 <host> [<port=443>]"
@@ -81,7 +82,7 @@ tls_fetch_cert_details() {
 tls_show_local_cert_headers() {
   local cert_file="$1"
   is_installed openssl awk || return 1
-  _tls_parse_cert_file "$cert_file" || return 1
+  _tls_check_function_params "$cert_file" || return 1
 
   echo "== $cert_file =="
   openssl x509 -in "$cert_file" -text -noout |
@@ -91,7 +92,8 @@ tls_show_local_cert_headers() {
 
 tls_check_local_cert_validity() {
   local cert_file="$1"
-  _tls_parse_cert_file "$cert_file" || return 1
+  is_installed openssl || return 1
+  _tls_check_function_params "$cert_file" || return 1
 
   local day_in_seconds=86400
   if openssl x509 -in "$cert_file" -checkend "$day_in_seconds" -noout; then
@@ -103,7 +105,8 @@ tls_check_local_cert_validity() {
 
 tls_is_local_ca_cert() {
   local cert_file="$1"
-  _tls_parse_cert_file "$cert_file" || return 1
+  is_installed openssl || return 1
+  _tls_check_function_params "$cert_file" || return 1
 
   if openssl x509 -in "$cert_file" -text -noout | grep -q 'CA:TRUE'; then
     echo "Certificate is a CA certificate"
@@ -223,7 +226,7 @@ tls_split_chained_cert_and_keys_into_files() {
 tls_verify_key_matches_cert() {
   local cert_file="$1"
   local key_file="$2"
-  _tls_parse_cert_file "$cert_file" || return 1
+  _tls_check_function_params "$cert_file" || return 1
 
   if [ -z "$key_file" ]; then
     echo "Usage: <cert_file.pem> <key_file.pem>"
@@ -235,6 +238,7 @@ tls_verify_key_matches_cert() {
     return 1
   fi
 
+  is_installed openssl || return 1
   if openssl x509 -noout -modulus -in "$cert_file" | openssl md5; then
     echo "Certificate modulus:"
     openssl x509 -noout -modulus -in "$cert_file" | openssl md5
