@@ -9,12 +9,12 @@ fi
 
 prevent_to_execute_directly
 
-# Get a list of authenticated Docker registries
+# List Docker authentication configurations
 docker_auth_list() {
   if [[ -f ~/.docker/config.json ]]; then
     jq -r '.auths | keys []' ~/.docker/config.json
   else
-    echo "No Docker authentication found"
+    echo "No Docker authentication configurations found"
   fi
 }
 
@@ -114,4 +114,18 @@ docker_tags_remove_all() {
   for tag in $tags; do
     docker image rm "$tag"
   done
+}
+
+docker_registry_list_tags() {
+  local repository_image=$1
+
+  if [ -z "$repository_image" ]; then
+    echo "Usage: docker_registry_list_tags <repository/image>"
+    return 1
+  fi
+
+  local json_output sorted_output
+  json_output=$(docker run --rm quay.io/skopeo/stable list-tags docker://"$repository_image")
+  sorted_output=$(echo "$json_output" | jq '.Tags |= sort')
+  echo "$sorted_output"
 }
