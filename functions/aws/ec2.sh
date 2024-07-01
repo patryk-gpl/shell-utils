@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Functions to work with AWS EC2
 
+aws_ec2_regions_list() {
+  aws ec2 describe-regions --query 'Regions[].RegionName' --output text
+}
+
 aws_ec2_status() {
   local instance_ids=("$@")
 
