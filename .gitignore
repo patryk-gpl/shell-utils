@@ -16,3 +16,5 @@ CTestTestfile.cmake
 *.crt
 *.csr
 *.key
+
+.venv
