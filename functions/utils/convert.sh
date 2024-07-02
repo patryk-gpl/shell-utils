@@ -58,54 +58,38 @@ convert_tabs_to_spaces() {
   fi
 }
 
-remove_trailing_newlines_from_files_recursively() {
+remove_trailing_spaces_from_ascii_files_recursively() {
   local folder="$1"
   if [[ -z $folder ]]; then
     echo "Error: folder not provided."
     return 1
   fi
 
-  local ignore_extensions=("png" "jks" "jpg" "gif" "pdf")
-  local ignore_files=()
-  for ext in "${ignore_extensions[@]}"; do
-    ignore_files+=("-not")
-    ignore_files+=("-name")
-    ignore_files+=("*.$ext")
-  done
-  local common_options=(-type f -not -path '*/.git/*' "${ignore_files[@]}")
-
+  local exclude_options_paths=(-type f -not -path '*/.git/*' -not -path '*/.venv/*')
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    find "$folder" "${common_options[@]}" -exec sed -i '' -e :a -e '/^$/{N;ba' -e '}' {} \;
+    find "$folder" "${exclude_options_paths[@]}" -exec file {} + | grep ASCII | cut -d: -f1 | xargs -I {} sed -i '' -e 's/[[:space:]]*$//' {}
   else
-    find "$folder" "${common_options[@]}" -exec sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' {} \;
+    find "$folder" "${exclude_options_paths[@]}" -exec file {} + | grep ASCII | cut -d: -f1 | xargs -I {} sed -i -e 's/[[:space:]]*$//' {}
   fi
 }
 
-remove_trailing_spaces_from_files_recursively() {
+remove_trailing_newlines_from_ascii_files_recursively() {
   local folder="$1"
   if [[ -z $folder ]]; then
     echo "Error: folder not provided."
     return 1
   fi
 
-  local ignore_extensions=("png" "jks" "jpg" "gif" "pdf")
-  local ignore_files=()
-  for ext in "${ignore_extensions[@]}"; do
-    ignore_files+=("-not")
-    ignore_files+=("-name")
-    ignore_files+=("*.$ext")
-  done
-  local common_options=(-type f -not -path '*/.git/*' "${ignore_files[@]}")
-
+  local exclude_options_paths=(-type f -not -path '*/.git/*' -not -path '*/.venv/*')
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    find "$folder" "${common_options[@]}" -exec sed -i '' -e 's/[[:space:]]*$//' {} \;
+    find "$folder" "${exclude_options_paths[@]}" -exec sed -i '' -e :a -e '/^$/{N;ba' -e '}' {} \;
   else
-    find "$folder" "${common_options[@]}" -exec sed -i -e 's/[[:space:]]*$//' {} \;
+    find "$folder" "${exclude_options_paths[@]}" -exec sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' {} \;
   fi
 }
 
 remove_trailing_chars() {
   local folder="$1"
-  remove_trailing_newlines_from_files_recursively "$folder"
-  remove_trailing_spaces_from_files_recursively "$folder"
+  remove_trailing_newlines_from_ascii_files_recursively "$folder"
+  remove_trailing_spaces_from_ascii_files_recursively "$folder"
 }
