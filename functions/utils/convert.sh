@@ -58,6 +58,15 @@ convert_tabs_to_spaces() {
   fi
 }
 
+remove_empty_lines_with_spaces_from_file() {
+  local filename="$1"
+  if [[ -z $filename ]]; then
+    echo "Error: filename not provided."
+    return 1
+  fi
+  sed '/^$/d; /^[[:space:]]*$/d' "$filename" >"${filename}.tmp" && mv "${filename}.tmp" "$filename"
+}
+
 remove_trailing_spaces_from_ascii_files_recursively() {
   local folder="$1"
   if [[ -z $folder ]]; then
