@@ -13,6 +13,9 @@ install: ## Install dependecies and init Git hooks
 	@poetry install
 	@poetry run pre-commit install
 
+update-poetry: ## Update poetry dependencies
+	@poetry update
+
 test: ## Run unit test for functions
 	@bats -r tests/functions
 
