@@ -7,6 +7,14 @@ fi
 
 prevent_to_execute_directly
 
+ollama_get_tags_via_api() {
+  local host=${1:-"localhost"}
+  local url="http://$host:11434/api/tags"
+
+  echo "Fetching tags from $url..."
+  curl -s "$url" | jq -r '.models[] | [.name, .details.family, .details.parameter_size, .details.quantization_level] | @tsv' | column -t -s $'\t'
+}
+
 ollama_pull_all() {
   local max_retries=3
   local failed_models=()
