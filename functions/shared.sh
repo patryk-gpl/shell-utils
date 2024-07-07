@@ -78,6 +78,6 @@ if [ -z "${_SHARED_SH_SOURCED_+x}" ]; then
       echo "Error: Some required tools are not installed" >&2
     fi
 
-    return $missing
+    return "$missing"
   }
 fi
