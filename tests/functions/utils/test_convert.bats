@@ -4,6 +4,11 @@ repo_root=$(git rev-parse --show-toplevel)
 
 load "$repo_root/functions/utils/convert.sh"
 
+@test "decode_base64" {
+  result=$(decode_base64 "bXlWYXIK")
+  [ "$result" = "myVar" ]
+}
+
 @test "convert_camel_case_to_kebab_case" {
   result=$(convert_camel_case_to_kebab_case "myVar")
   [ "$result" = "my-var" ]
