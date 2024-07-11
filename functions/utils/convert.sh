@@ -6,6 +6,33 @@ else
 fi
 prevent_to_execute_directly
 
+decode_base64() {
+  local input="$1"
+  local decoded="$input"
+  local prev_decoded=""
+
+  if [ -z "$input" ]; then
+    echo "Error: input is empty."
+    return 1
+  fi
+
+  while true; do
+    prev_decoded="$decoded"
+    decoded=$(echo -n "${prev_decoded%=}" | base64 -d 2>/dev/null) || decoded=$(echo -n "$prev_decoded" | base64 -d 2>/dev/null)
+
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ]; then
+      echo "$prev_decoded"
+      return
+    fi
+
+    if [ "$decoded" = "$prev_decoded" ]; then
+      echo "$decoded"
+      return
+    fi
+  done
+}
+
 # convert myVar to my-var
 convert_camel_case_to_kebab_case() {
   echo "$1" | sed -r 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]'
