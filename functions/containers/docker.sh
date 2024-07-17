@@ -47,6 +47,24 @@ docker_container_active() {
   fi
 }
 
+docker_container_remove() {
+  local container_name=$1
+
+  if [ -z "$container_name" ]; then
+    echo "Error: No container name provided."
+    echo "Usage: docker_container_remove <container_name>"
+    return 1
+  fi
+
+  echo "Stopping container: $container_name..."
+  docker stop "$container_name" >/dev/null || echo "Container $container_name stopped.."
+
+  echo "Deleting container: $container_name..."
+  docker rm "$container_name" >/dev/null || echo "Container $container_name removed.."
+
+  echo "Container $container_name has been stopped and deleted."
+}
+
 # Show Docker image labels
 docker_image_labels() {
   if [[ -z "$1" ]]; then
