@@ -26,7 +26,19 @@ docker_image_remove_with_prefix_or_tag() {
     echo "Prefix or tag is required"
     return 1
   fi
-  docker images --format "{{.Repository}}:{{.Tag}}" | grep -E "^$prefix_or_tag|:$prefix_or_tag$" | xargs -I {} docker rmi {}
+
+  docker images --format "{{.Repository}}:{{.Tag}}:{{.ID}}" | grep -E "^$prefix_or_tag|:$prefix_or_tag:" | while read -r line; do
+    IFS=':' read -r repo tag id <<<"$line"
+    if [ "$tag" = "<none>" ]; then
+      image="$id"
+    else
+      image="$repo:$tag"
+    fi
+    if [ -n "$image" ]; then
+      echo "Removing image: $image"
+      docker rmi "$image" || echo "Failed to remove image: $image"
+    fi
+  done
 }
 
 # Return status of Docker Engine daemon
