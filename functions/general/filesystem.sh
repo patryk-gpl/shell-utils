@@ -65,7 +65,55 @@ file_dump_content() {
     tree -f --noreport "$root_dir"
     echo
     echo "Content of all files from the folder and sub-folders: "
-    find "$root_dir" -type f -exec sh -c 'echo "Filename: $1"; cat "$1"; echo' _ {} \;
-    echo "Wait for the next prompt. Confirm with DONE."
+    find "$root_dir" -type f -exec sh -c 'echo "Filename: $1"; cat "$1"; echo "===END-OF-FILE==="' _ {} \;
   } >"$output_file"
+
+  echo "Dump stored under $output_file"
+}
+
+download_file() {
+  local url="$1"
+  local dest_folder="$2"
+
+  if [[ -z "$url" ]]; then
+    echo "Usage: download_file <URL> [destination_folder]"
+    echo "Downloads a file from the provided URL and saves it with the original filename."
+    echo "If a destination folder is provided, the file will be saved there."
+    return 1
+  fi
+
+  local filename
+  filename=$(basename "$url")
+
+  # Remove query string from filename, if present
+  filename=${filename%%\?*}
+
+  # Decode URL-encoded characters in the filename
+  filename=$(printf '%b' "${filename//%/\\x}")
+
+  local dest_path
+  if [[ -n "$dest_folder" ]]; then
+    # Create destination folder if it doesn't exist
+    mkdir -p "$dest_folder"
+    dest_path="$dest_folder/$filename"
+  else
+    dest_path="$filename"
+  fi
+
+  if command -v wget &>/dev/null; then
+    wget -O "$dest_path" "$url"
+  elif command -v curl &>/dev/null; then
+    curl -L -o "$dest_path" "$url"
+  else
+    echo "Error: Neither wget nor curl is available. Please install one of them."
+    return 1
+  fi
+
+  # shellcheck disable=SC2181
+  if [[ $? -eq 0 ]]; then
+    echo "File downloaded successfully: $dest_path"
+  else
+    echo "Error: Failed to download the file."
+    return 1
+  fi
 }
