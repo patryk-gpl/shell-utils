@@ -44,7 +44,7 @@ This command will restart the Ollama container, allowing it to pick up any modif
 Run Open WebUI in a Docker container.
 
 ```bash
-docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
+docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:latest
 ```
 
 After starting, access the Web UI at http://localhost:3000 and configure your Ollama instance (local or remote) running on selected port (local default 11434 or remote 8081).
