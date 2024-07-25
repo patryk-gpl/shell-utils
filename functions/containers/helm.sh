@@ -6,6 +6,22 @@ else
 fi
 prevent_to_execute_directly
 
+function helm_history_all_releases() {
+  local releases
+  releases=$(helm list --all-namespaces --all -o json | jq -r '.[] | "\(.name) \(.namespace)"')
+
+  if [ -z "$releases" ]; then
+    echo "No Helm releases found in the cluster."
+    return
+  fi
+
+  echo "$releases" | while read -r name namespace; do
+    echo "=== History for release '$name' in namespace '$namespace' ==="
+    helm history "$name" -n "$namespace"
+    echo # Empty line for better readability
+  done
+}
+
 helm_get_release_details() {
   local release_name=""
   local revision=""
