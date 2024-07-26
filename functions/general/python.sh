@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # This file contains functions to utilize Python CLI
 
 if [[ -n "$ZSH_VERSION" ]]; then

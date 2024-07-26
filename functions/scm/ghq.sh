@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Functions to work with ghq tool
 
 if [[ -n "$ZSH_VERSION" ]]; then
@@ -33,7 +32,7 @@ cdq() {
   if [ ${#target_dirs[@]} -eq 1 ]; then
     # shellcheck disable=SC2124
     local dir="${target_dirs[@]:0:1}"
-    cd "$dir"
+    cd "$dir" || return 1
   else
     echo "Multiple matching directories found:"
     local i=1
