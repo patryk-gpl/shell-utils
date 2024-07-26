@@ -108,3 +108,59 @@ aws_ec2_instance_network_details() {
   aws ec2 describe-instances --instance-ids "$instance_id" \
     --query 'Reservations[].Instances[].{PublicIpAddress: PublicIpAddress, PrivateIpAddress: PrivateIpAddress, SubnetId: SubnetId, VpcId: VpcId, NetworkInterfaces: NetworkInterfaces}'
 }
+
+aws_ec2_instance_get_size() {
+  if [ "$#" -ne 1 ]; then
+    echo "Usage: aws_ec2_instance_get_size <Instance-ID>" >&2
+    return 1
+  fi
+
+  local instance_id="$1"
+
+  if [[ -z "$instance_id" ]]; then
+    echo "Error: Instance ID is required." >&2
+    return 1
+  fi
+
+  echo "Fetching details for instance ID: $instance_id..."
+  local instance_details
+  if ! instance_details=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[*].Instances[*].{InstanceType:InstanceType,State:State.Name,LaunchTime:LaunchTime,AvailabilityZone:Placement.AvailabilityZone}" --output json); then
+    echo "Failed to fetch instance details. Please check the instance ID." >&2
+    return 1
+  fi
+
+  echo "Instance details:"
+  echo "$instance_details"
+}
+
+aws_ec2_instance_change_size() {
+  if [ "$#" -ne 2 ]; then
+    echo "Usage: aws_ec2_instance_change_size <instance_id> <new_instance_type>" >&2
+    return 1
+  fi
+  local instance_id="$1"
+  local new_size="$2"
+  if ! [[ "$instance_id" =~ ^i-[0-9a-f]{8,17}$ ]]; then
+    echo "Invalid instance ID format: $instance_id" >&2
+    return 1
+  fi
+
+  local current_type
+  current_type=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[].Instances[].InstanceType" --output text)
+  if [[ "$current_type" == "$new_size" ]]; then
+    echo "The new instance type ($new_size) is the same as the current instance type ($current_type)" >&2
+    return 1
+  fi
+  echo "Stopping instance $instance_id..."
+  aws ec2 stop-instances --instance-ids "$instance_id"
+  aws ec2 wait instance-stopped --instance-ids "$instance_id"
+
+  echo "Changing instance type from $current_type to $new_size..."
+  aws ec2 modify-instance-attribute --instance-id "$instance_id" --instance-type "{\"Value\": \"$new_size\"}"
+
+  echo "Starting instance $instance_id..."
+  aws ec2 start-instances --instance-ids "$instance_id"
+  aws ec2 wait instance-running --instance-ids "$instance_id"
+
+  echo "Instance $instance_id has been resized to $new_size successfully."
+}
