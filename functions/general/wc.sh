@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # This file contains functions to work wc (word count) tool
 
 if [[ -n "$ZSH_VERSION" ]]; then

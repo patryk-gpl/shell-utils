@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Functions to work with AWS EC2
 
 aws_ec2_regions_list() {

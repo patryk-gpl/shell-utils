@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Functions to work with Flux v2
 
 if [[ -n "$ZSH_VERSION" ]]; then
