@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Functions to work with Git repositories
 
 if [[ -n "$ZSH_VERSION" ]]; then

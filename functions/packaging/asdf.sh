@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Functions to work with asdf tool
 
 if [[ -n "$ZSH_VERSION" ]]; then

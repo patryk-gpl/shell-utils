@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Functions to work with Kubernetes pods
 
 if [[ -n "$ZSH_VERSION" ]]; then

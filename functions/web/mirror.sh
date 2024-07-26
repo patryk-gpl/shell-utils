@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Functions to work with Web pages
 
 if [[ -n "$ZSH_VERSION" ]]; then

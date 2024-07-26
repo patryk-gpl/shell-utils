@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Functions to work with Git grep
 if [[ -n "$ZSH_VERSION" ]]; then
   source "$(dirname "$0")/../../shared.sh"
