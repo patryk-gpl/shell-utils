@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 aws_ecr_get_repositories_by_prefix() {
   local prefix="$1"
 

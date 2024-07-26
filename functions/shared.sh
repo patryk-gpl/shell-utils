@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # This script contains functions that are used by other functions defined in sub-folders.
 
 # shellcheck disable=SC2034

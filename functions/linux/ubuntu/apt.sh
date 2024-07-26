@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Functions to work with Ubuntu apt package manager
 
 if [[ -n "$ZSH_VERSION" ]]; then
