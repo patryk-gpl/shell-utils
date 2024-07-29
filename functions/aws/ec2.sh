@@ -41,6 +41,18 @@ aws_ec2_stop() {
   aws ec2 stop-instances --instance-ids "${instance_ids[@]}" --output json | jq .
 }
 
+aws_ec2_delete() {
+  local instance_ids=("$@")
+
+  if [[ ${#instance_ids[@]} -eq 0 ]]; then
+    echo "Usage: aws_ec2_delete <instance_id> [<instance_id> ...]"
+    return 1
+  fi
+
+  echo "Terminating the AWS EC2 instances:" "${instance_ids[@]}"
+  aws ec2 terminate-instances --instance-ids "${instance_ids[@]}" --output json | jq .
+}
+
 aws_ec2_restart_instance() {
   local instance_id="$1"
   if [[ -z "$instance_id" ]]; then
@@ -69,6 +81,50 @@ aws_ec2_restart_instance() {
     fi
     aws_ec2_start "$instance_id"
   fi
+}
+
+aws_ec2_volume_resize() {
+  local instance_id="$1"
+  local new_size="$2"
+
+  if [[ -z "$instance_id" || -z "$new_size" ]]; then
+    echo "Usage: aws_ec2_volume_resize <instance_id> <new_size_in_GB>"
+    return 1
+  fi
+
+  # Get the volume ID of the root device
+  local volume_id
+  volume_id=$(aws ec2 describe-instances --instance-id "$instance_id" \
+    --query 'Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' \
+    --output text)
+
+  if [[ -z "$volume_id" ]]; then
+    echo "Failed to retrieve volume ID for instance $instance_id"
+    return 1
+  fi
+
+  local current_size
+  current_size=$(aws ec2 describe-volumes --volume-ids "$volume_id" \
+    --query 'Volumes[0].Size' \
+    --output text)
+
+  if [[ "$new_size" -le "$current_size" ]]; then
+    echo "New size must be greater than the current size ($current_size GB)"
+    return 1
+  fi
+
+  echo "Resizing volume $volume_id from $current_size GB to $new_size GB..."
+
+  # Modify the volume size
+  aws ec2 modify-volume --volume-id "$volume_id" --size "$new_size"
+
+  echo "Waiting for volume modification to complete..."
+  aws ec2 wait volume-in-use --volume-ids "$volume_id"
+
+  echo "Volume resize initiated. You may need to extend the file system within the instance."
+  echo "To extend the file system, connect to the instance and run:"
+  echo "sudo growpart /dev/nvme0n1 1"
+  echo "sudo xfs_growfs -d /"
 }
 
 aws_ec2_get_instance_id_by_ip() {
