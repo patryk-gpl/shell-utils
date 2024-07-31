@@ -17,6 +17,83 @@ _kube_get_namespace() {
   fi
 }
 
+kube_diff_creation_time() {
+  local help_message="
+Usage: kube_diff_creation_time <resource1> <resource2> [resource3...] [namespace]
+
+Compare the creation times of two or more Kubernetes resources.
+
+Arguments:
+  <resource1>, <resource2>, ...  Resources in the format 'type/name' (e.g., 'secret/my-secret')
+  [namespace]                    Optional: Kubernetes namespace (default: currently active namespace)
+
+Examples:
+  kube_diff_creation_time secret/my-secret job/my-job
+  kube_diff_creation_time pod/frontend-pod deployment/backend-deploy service/my-service my-namespace
+
+Note:
+  - At least two resources must be provided.
+  - If namespace is not provided, the current active namespace will be used.
+  - You must have permission to access these resources in the specified namespace.
+  - Supported resource types include: pods, secrets, deployments, jobs, services, etc.
+"
+
+  if [ $# -lt 2 ]; then
+    echo "$help_message"
+    return 1
+  fi
+
+  local namespace
+  local resources=()
+
+  # Parse arguments
+  for arg in "$@"; do
+    if [[ "$arg" != *"/"* ]]; then
+      namespace=$arg
+    else
+      resources+=("$arg")
+    fi
+  done
+
+  # Set default namespace if not provided
+  namespace=${namespace:-$(kubectl config view --minify --output 'jsonpath={..namespace}')}
+
+  # Check if we have at least two resources
+  if [ ${#resources[@]} -lt 2 ]; then
+    echo "Error: At least two resources must be provided."
+    echo "$help_message"
+    return 1
+  fi
+
+  echo "Namespace: $namespace"
+
+  # Array to store resource names and timestamps
+  local -A timestamps
+
+  # Get timestamps for all resources
+  for resource in "${resources[@]}"; do
+    IFS='/' read -r type name <<<"$resource"
+
+    if [[ -z $type || -z $name ]]; then
+      echo "Error: Invalid resource format for '$resource'. Use 'type/name'."
+      return 1
+    fi
+
+    if ! timestamp=$(kubectl get "$type" "$name" -n "$namespace" -o jsonpath='{.metadata.creationTimestamp}' 2>/dev/null); then
+      echo "Error: Failed to get timestamp for $resource in namespace $namespace. Make sure the resource exists and you have permission to access it."
+      return 1
+    fi
+
+    timestamps["$resource"]=$timestamp
+  done
+
+  echo -e "\nRanking from oldest to youngest:"
+  # Sort timestamps and print ranking
+  printf '%s\n' "${!timestamps[@]}" |
+    sort -k2 -t= <(for k in "${!timestamps[@]}"; do echo "$k=${timestamps[$k]}"; done) |
+    awk -F= '{print NR ". " $1 " (" $2 ")"}'
+}
+
 ## Generic
 kube_resources_get_all() {
   local namespace && namespace=$(_kube_get_namespace "$1")
