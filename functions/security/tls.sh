@@ -22,6 +22,77 @@ _tls_check_function_params() {
 }
 
 # Main functions
+
+# Function: tls_import_root_ca_certs
+#
+# Description: This function imports root CA certificates from a source directory and updates the CA certificates on the system.
+#
+# Parameters:
+#   - source_dir: The directory containing the .crt files to import. Default is /mnt/c/Users/$USERNAME/certs
+#
+# Returns:
+#   - 0: If the root CA certificates are successfully imported and updated.
+#   - 1: If there is an error during the import or update process.
+#
+# Supported distributions:
+#   - Debian/Ubuntu
+#   - CentOS/RHEL/Fedora
+#
+# Usage:
+#   tls_import_root_ca_certs [source_dir]
+#
+# Example:
+#   tls_import_root_ca_certs /path/to/certificates
+#
+tls_import_root_ca_certs() {
+  local source_dir="${1:-/mnt/c/Users/$(cmd.exe /c echo %USERNAME% 2>/dev/null | tr -d '\r')/certs}"
+  local dest_dir
+  local update_cmd
+
+  # Determine the correct destination directory and update command based on the distribution
+  if [ -f /etc/debian_version ]; then
+    dest_dir="/usr/local/share/ca-certificates"
+    update_cmd="update-ca-certificates"
+  elif [ -f /etc/redhat-release ]; then
+    dest_dir="/etc/pki/ca-trust/source/anchors"
+    update_cmd="update-ca-trust extract"
+  else
+    echo "Unsupported distribution. This script works on Debian/Ubuntu or CentOS/RHEL/Fedora."
+    return 1
+  fi
+
+  if [ ! -d "$source_dir" ]; then
+    echo "Error: Source directory $source_dir does not exist."
+    echo "Syntax: tls_import_root_ca_certs [source_dir]"
+    echo "  source_dir: The directory containing the .crt files to import. Default is /mnt/c/Users/$(cmd.exe /c echo %USERNAME% 2>/dev/null | tr -d '\r')/certs"
+    return 1
+  fi
+
+  # Check if there are any .crt files in the source directory
+  if ! find "$source_dir" -maxdepth 1 -name "*.crt" -print -quit | grep -q .; then
+    echo "Error: No .crt files found in $source_dir"
+    return 1
+  fi
+
+  sudo mkdir -p "$dest_dir"
+
+  # Copy all .crt files from the source directory to the destination
+  echo "Copying certificates from $source_dir to $dest_dir"
+  if ! sudo cp "$source_dir"/*.crt "$dest_dir"/; then
+    echo "Error: Failed to copy certificates from $source_dir to $dest_dir"
+    return 1
+  fi
+
+  # Update the CA certificates
+  echo "Updating CA certificates..."
+  if ! sudo "$update_cmd"; then
+    echo "Error: Failed to update CA certificates"
+    return 1
+  fi
+
+  echo "Root CA certificates have been successfully imported and updated."
+}
+
 tls_fetch_fullchain() {
   local host=${1:-}
   local port=${2:-443}
