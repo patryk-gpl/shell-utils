@@ -1,0 +1,7 @@
+legacy_version_file = yes
+use_release_candidates = no
+always_keep_download = no
+plugin_repository_last_check_duration = 172800
+concurrency = 4
+java_macos_integration_enable = yes
+reshim_on_core_plugin_install = yes
