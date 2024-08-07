@@ -53,7 +53,7 @@ function Export-RootCACert {
     # Export certificates
     foreach ($cert in $rootCerts) {
         $certName = ($cert.Subject -replace '[^a-zA-Z0-9]', '_').TrimStart('_')
-        $extension = if ($Format -eq "PEM") { "pem" } else { "der" }
+        $extension = if ($Format -eq "PEM") { "crt" } else { "der" }
         $certFile = Join-Path $ExportPath "$certName.$extension"
 
         try {
