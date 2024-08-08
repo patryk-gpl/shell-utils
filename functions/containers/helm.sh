@@ -23,25 +23,24 @@ function helm_history_all_releases() {
 
 helm_get_release_details() {
   local release_name=""
-  local revision=""
+  local revisions=()
   local zipfile=""
   local password=""
-
-  # Parse command line arguments
   while [[ "$#" -gt 0 ]]; do
     case $1 in
       -h | --help)
         cat <<EOF
-Usage: helm_get_release_details <release_name> <revision> [-z <zipfile>] [-p <password>]
+Usage: helm_get_release_details <release_name> <revision1> [<revision2> ...] [-z <zipfile>] [-p <password>]
 
 Purpose:
     This function retrieves detailed information about a specific Helm release
-    at a given revision. It exports data for various subcommands (hooks, manifest,
+    for one or more revisions. It exports data for various subcommands (hooks, manifest,
     metadata, notes, and values) into separate log files.
 
 Arguments:
     release_name    The name of the Helm release
-    revision        The revision number of the release
+    revision1       The first revision number of the release
+    revision2...    Additional revision numbers (optional)
 
 Options:
     -z, --zipfile <zipfile>    Compress output files into a zip archive
@@ -53,7 +52,7 @@ Output:
     for each non-empty subcommand output. If -z is specified, creates a zip archive.
 
 Example:
-    helm_get_release_details my-release 3 -z output.zip -p mypassword
+    helm_get_release_details my-release 1 2 3 -z output.zip -p mypassword
 
 Note:
     Empty log files are automatically removed.
@@ -79,8 +78,8 @@ EOF
       *)
         if [[ -z "$release_name" ]]; then
           release_name="$1"
-        elif [[ -z "$revision" ]]; then
-          revision="$1"
+        elif [[ "$1" =~ ^[0-9]+$ ]]; then
+          revisions+=("$1")
         else
           echo "Error: Unexpected argument: $1"
           return 1
@@ -89,44 +88,38 @@ EOF
         ;;
     esac
   done
-
-  if [[ -z "$release_name" || -z "$revision" ]]; then
-    echo "Error: Both release name and revision number are required."
+  if [[ -z "$release_name" || ${#revisions[@]} -eq 0 ]]; then
+    echo "Error: Release name and at least one revision number are required."
     echo "Use -h or --help for usage information."
     return 1
   fi
-
   if [[ -n "$password" && -z "$zipfile" ]]; then
     echo "Error: Password (-p) can only be used with zipfile (-z)."
     return 1
   fi
-
   local subcommands=("hooks" "manifest" "metadata" "notes" "values")
   local files_created=()
-
-  for cmd in "${subcommands[@]}"; do
-    local output_file="${release_name}-${revision}-${cmd}.log"
-    echo "Exporting $cmd to $output_file..."
-    if ! helm get "$cmd" "$release_name" --revision "$revision" >"$output_file"; then
-      echo "Warning: Failed to get $cmd for $release_name (revision $revision)"
-    fi
-
-    if [ ! -s "$output_file" ]; then
-      echo "Removing empty file: $output_file"
-      rm "$output_file"
-    else
-      files_created+=("$output_file")
-    fi
+  for revision in "${revisions[@]}"; do
+    for cmd in "${subcommands[@]}"; do
+      local output_file="${release_name}-${revision}-${cmd}.log"
+      echo "Exporting $cmd for revision $revision to $output_file..."
+      if ! helm get "$cmd" "$release_name" --revision "$revision" >"$output_file"; then
+        echo "Warning: Failed to get $cmd for $release_name (revision $revision)"
+      fi
+      if [ ! -s "$output_file" ]; then
+        echo "Removing empty file: $output_file"
+        rm "$output_file"
+      else
+        files_created+=("$output_file")
+      fi
+    done
   done
-
   if [[ ${#files_created[@]} -eq 0 ]]; then
     echo "No files exported."
     return 0
   fi
-
   echo "Exported files:"
   printf '%s\n' "${files_created[@]}"
-
   if [[ -n "$zipfile" ]]; then
     if [[ -n "$password" ]]; then
       zip -e -P "$password" "$zipfile" "${files_created[@]}"
