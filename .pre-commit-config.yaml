@@ -36,3 +36,17 @@ repos:
   - id: ruff
     args: [ --fix ]
   - id: ruff-format
+
+- repo: local
+  hooks:
+    - id: check-shell-filenames
+      name: Check shell script filenames
+      entry: hooks/check_shell_filenames.sh
+      language: script
+      files: '.*\.(sh|bats)$'
+
+    - id: check-powershell-filenames
+      name: Check PowerShell filenames
+      entry: hooks/check_powershell_filenames.sh
+      language: script
+      files: '.*\.ps1$'
