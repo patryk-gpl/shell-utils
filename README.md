@@ -6,6 +6,16 @@
 
 Set of helper scripts and functions solving common problems.
 
+# GPG Key
+
+My public key can be retrieved from the following GPG key servers:
+
+```shell
+gpg --recv-keys D5B5760DAE881A77D30D3C2BEC9DE6EAF150DA18
+```
+
+Additional tips how to distribute / publish / retrieve GPG keys can be found [here](docs/gpg.md).
+
 # Resources
 
 - [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html)
