@@ -156,9 +156,18 @@ ollama_update() {
   echo "Current Ollama version: $current_version"
 
   if pgrep -x "ollama" >/dev/null; then
-    echo "Ollama is currently running. Stopping Ollama..."
-    sudo systemctl stop ollama || sudo killall ollama
-    sleep 2 # Give it a moment to fully stop
+    echo "Ollama is currently running..."
+    if [[ "$(uname)" == "Linux" ]]; then
+      echo "Stopping Ollama..."
+      sudo systemctl stop ollama || sudo killall ollama
+      sleep 2 # Give it a moment to fully stop
+    elif [[ "$(uname)" == "Darwin" ]]; then
+      echo "Running on macOS. Update Ollama via restarting it from the menu bar."
+      return 1
+    else
+      echo "Unknown operating system"
+      return 1
+    fi
   fi
 
   # Backup the current version
