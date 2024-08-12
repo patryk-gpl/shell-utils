@@ -51,3 +51,66 @@ git_branch_list_heads() {
     echo "Remote head: $remote_head"
   fi
 }
+
+git_branch_find_upstream() {
+  local feature_branch="$1"
+
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "Error: Not in a git repository" >&2
+    return 1
+  fi
+
+  if [ -z "$feature_branch" ]; then
+    feature_branch=$(git rev-parse --abbrev-ref HEAD)
+
+    echo "No feature branch provided for verification."
+    echo "Using the current branch: $feature_branch"
+  elif ! git rev-parse --verify "$feature_branch" >/dev/null 2>&1; then
+    echo "Error: Branch '$feature_branch' does not exist." >&2
+    return 1
+  fi
+
+  echo "Trying to fetch all changes from the remote.."
+  if ! git fetch --all --quiet; then
+    echo "Error: Unable to fetch from remote" >&2
+    return 1
+  fi
+
+  # List all branches (including remote branches) and their merge bases with the feature branch
+  local branches
+  branches=$(git for-each-ref --format='%(refname:short)' refs/heads/ refs/remotes/)
+
+  local best_branch
+  local best_distance=-1
+
+  for branch in $branches; do
+    if [ "$branch" != "$feature_branch" ] && ! [[ "$branch" =~ /$feature_branch$ ]]; then
+      # Find the merge base between the branch and the feature branch
+      local merge_base
+      merge_base=$(git merge-base "$branch" "$feature_branch")
+
+      # Skip if there's no merge base
+      if [ -z "$merge_base" ]; then
+        continue
+      fi
+
+      # Compute the distance from the merge base to the feature branch
+      local distance
+      distance=$(git rev-list --count "$merge_base..$feature_branch")
+
+      # Check if this is the best (shortest distance) so far
+      if [ "$best_distance" -lt 0 ] || [ "$distance" -lt "$best_distance" ]; then
+        best_distance=$distance
+        best_branch=$branch
+      fi
+    fi
+  done
+
+  if [ -n "$best_branch" ]; then
+    echo "The upstream branch seems to be: $best_branch"
+    return 0
+  else
+    echo "No upstream branch found for '$feature_branch'." >&2
+    return 1
+  fi
+}
