@@ -7,34 +7,31 @@ prevent_to_execute_directly
 
 decode_base64() {
   local input="$1"
-  local temp_file
-  local decoded
+  local decoded="$input"
+  local temp
 
   if [ -z "$input" ]; then
     echo "Error: input is empty." >&2
     return 1
   fi
 
-  temp_file=$(mktemp)
-  trap 'rm -f "$temp_file"' EXIT
-
-  if ! printf '%s' "$input" | base64 -d >"$temp_file" 2>/dev/null; then
-    printf '%s\n' "$input"
-    return 0
-  fi
-
   while true; do
-    if ! base64 -d <"$temp_file" >"${temp_file}.new" 2>/dev/null; then
+    if temp=$(echo -n "$decoded" | base64 -d 2>/dev/null) && [ -n "$temp" ]; then
+      if [ "$temp" = "$decoded" ]; then
+        break
+      fi
+
+      if echo -n "$temp" | LC_ALL=C grep -q '[^[:print:][:space:]]'; then
+        break
+      fi
+
+      decoded="$temp"
+    else
       break
     fi
-    if cmp -s "$temp_file" "${temp_file}.new"; then
-      break
-    fi
-    mv "${temp_file}.new" "$temp_file"
   done
 
-  decoded=$(<"$temp_file")
-  printf '%s\n' "$decoded"
+  printf '%s' "$decoded"
 }
 
 # convert myVar to my-var
