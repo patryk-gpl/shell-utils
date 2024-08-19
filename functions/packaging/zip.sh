@@ -5,6 +5,64 @@ else
 fi
 prevent_to_execute_directly
 
+# Function: 7zip_archive_with_password
+#
+# Description:
+#   This function creates a password-protected 7zip archive of a specified folder.
+#
+# Parameters:
+#   - $1: The path to the folder to be archived.
+#
+# Usage:
+#   7zip_archive_with_password <path_to_folder>
+#
+# Returns:
+#   - 0: If the archive is created successfully.
+#   - 1: If there is an error during the archive creation process.
+#
+# Dependencies:
+#   - 7zip: The 7zip utility must be installed to use this function.
+#
+# Example:
+#   7zip_archive_with_password /path/to/folder
+#
+#   This will create a password-protected 7zip archive of the specified folder.
+7zip_archive_with_password() {
+  if [ -z "$1" ]; then
+    echo "Usage: 7zip_archive_with_password <path_to_folder>"
+    return 1
+  fi
+
+  if ! command -v 7z >/dev/null 2>&1; then
+    echo "Error: 7zip is not installed. Please install 7zip to use this function."
+    return 1
+  fi
+
+  if [ ! -d "$1" ]; then
+    echo "Error: '$1' is not a valid directory"
+    return 1
+  fi
+
+  archive_name="$(basename "$1")_$(date +%Y%m%d_%H%M%S).7z"
+
+  # Prompt for password
+  echo "Enter password for encryption:"
+  read -r -s password
+
+  if [ -z "$password" ]; then
+    echo "Error: Password cannot be empty"
+    return 1
+  fi
+
+  # Use the password with 7z
+  if 7z a -mhe=on -p"$password" "$archive_name" "$1"; then
+    echo "Archive created successfully: $archive_name"
+  else
+    echo "Error creating archive"
+    return 1
+  fi
+}
+
 # Function: archive_extract
 # Description: Extracts the contents of an archive file.
 # Parameters:
