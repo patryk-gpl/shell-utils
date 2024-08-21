@@ -1,0 +1,173 @@
+[user]
+	name = Patryk Kubiak
+	email = Patryk.Kubiak@gmail.com
+
+[branch]
+	autosetuprebase = always
+
+[core]
+	editor = vim
+
+[merge]
+	tool = vscode
+
+[mergetool "vscode"]
+	cmd = code --wait $MERGED
+
+[diff]
+	tool = vscode
+
+[difftool "vscode"]
+	cmd = code --wait --diff $LOCAL $REMOTE
+
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  interactive = auto
+  ui = true
+  pager = true
+
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan
+
+[apply]
+	whitespace = nowarn
+
+[core]
+	pager = less -r
+	autocrlf = input
+	excludesfile = /Users/kpatryk/.gitignore_global
+
+[help]
+	autocorrect = 1
+
+[push]
+	default = current
+	autosetupremote = true
+
+[credential]
+	#cache credentials for 100 days
+	helper = cache --timeout=8640000
+
+[alias]
+	st = status
+	sts = status --short --branch
+	br = branch -a
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+	lg1 = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+	grog = log --graph --abbrev-commit --decorate --all --format=format:\"%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(dim white) - %an%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)\"
+  	cam = commit -am
+	co = checkout
+	please = push --force-with-lease
+	it = !git init . && git commit -m 'Init commit' --allow-empty
+
+	# Amend without message update
+	force = "!sh -c 'git commit --amend --no-edit ; git please'"
+	conv = commit -a --amend --no-edit --no-verify
+
+
+	# Amend with message update and push
+	upp = !"sh -c 'git up && git please'"
+
+	#those who don't know history, are doomed to repeat it
+	hist = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s' --graph
+	histfull = log --pretty=format:'%Cred%h%Creset %C(bold blue)<%an>%Creset%C(yellow)%d%Creset %Cgreen(%cr)%Creset%n%w(80,8,8)%s%n' --graph --name-status
+	llog = log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=iso
+	changelog = log --pretty=format:'%Cgreen%d %Creset%s' --date=iso
+
+	whois = "!sh -c 'git log -i -1 --pretty=\"format::%an <%ae>\n\" --author=\"$1\"' -"
+	whatis = show -s --pretty='tformat::%h (%s, %ad)' --date=short
+	howmany = "!sh -c 'git log -a --pretty=oneline | wc -l'"
+	howmanybywhom = shortlog -sn
+	howmanybyemail = shortlog -sen
+
+	prsbyauthor = !git log --merges --pretty=\"%an\" | tr '[:upper:]' '[:lower:]' | tr '.' ' ' | sort  |uniq -c | sort -rn
+
+	#what's going on, I don't even
+	anychanges = !sh -c 'git fetch' && git log --oneline HEAD..origin/$1
+	anychangesonmaster = !sh -c 'git fetch' && git log --oneline HEAD..origin/master
+	whoischanging = !sh -c 'git shortlog HEAD..origin/$0'
+	whoischangingmaster = !sh -c 'git shortlog HEAD..origin/master'
+
+	#what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
+	showorigin = !sh -c "isHash=true; for i in `git ls-remote -h origin`; do [ ! -z $isHash ] &&  echo \" $i\" || printf \"%-8s %8s %-8s%-3s %-10s %-20s\" `git show -s --pretty=format:\"%C(yellow)%h %Cred%ad %Cblue%an\" --date=relative $i`  ; [ ! -z $isHash ] && isHash=\"\" || isHash=true ;  done"
+	updateallbranches = !sh -c "for branchname in `git branch -r `; do git checkout $branchname ; git pull; done"
+
+	# fix .gitignore
+	fixgitignore = !git rm -r --cached . && git add . && git commit -m \"Just a .gitignore fix \"
+	showtags = show-ref --tags
+	tagwithdate = !sh -c 'git tag "$0"_$(date "+%y-%m-%d_%H-%M-%S")'
+	purr = pull --rebase
+	difff = diff --color-words #just words
+	bbranch = branch -v
+	sth = stash -u
+
+	#what do I have in my toolbox?
+	alias = !git config --list | grep 'alias\\.' | sed 's/alias\\.\\([^=]*\\)=\\(.*\\)/\\1\\\t => \\2/' | sort
+
+	#Deletes all branches that were safely merged into the main. All other are skipped (no worries).
+	cleanup = !git branch --merged main | grep -v 'main$' | xargs git branch -d
+
+	#Deletes orphaned remote branches (.git/refs/remotes/origin), clean up reflog and remove all untracked files
+	cleanuplocal = !git remote prune origin && git gc && git clean -df
+	unstage = reset HEAD --
+
+	# create isolated worktree $1 = new-branch, $2 = dir , $3 = old-branch to clone
+	wadd = "!f() { git worktree add -b $1 $2 $3; cd $2; }; f"
+	wlist = worktree list
+	wprune = worktree prune
+
+	# the acronym stands for "subtree add"
+	sba = "!f() { git subtree add --prefix $2 $1 master --squash; }; f"
+	# the acronym stands for "subtree update"
+	sbu = "!f() { git subtree pull --prefix $2 $1 master --squash; }; f"
+
+  	rc = rebase --continue
+  	ri = rebase --interactive --autosquash
+	change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [ \\\"$`echo $VAR`\\\" = '$OLD' ]; then export $VAR='$NEW'; fi\" $@; }; f "
+	stash-staged = "!bash -c \"git stash --keep-index; git stash push -m \"staged\" --keep-index; git stash pop stash@{1}\""
+
+	# New aliase
+	reflg = log -g --pretty=format:\"%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)\" --abbrev-commit --date=relative
+	last = log -10 --pretty=format:'%C(yellow)%h%Creset %C(green)%ar%Creset %s'
+	find-large-files = !git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | sed -n 's/^blob //p' | sort -rn -k2 | head -10
+	current-branch = rev-parse --abbrev-ref HEAD
+
+[mergetool]
+	keepBackup = false
+
+[remote "origin"]
+	prune = true
+
+[rebase]
+	autosquash = true
+	autostash = true
+
+[init]
+	defaultBranch = main
+[secrets]
+	patterns = credentials\\s+=\\s+\\{
+[pull]
+	rebase = true
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+[fetch]
+	prune = true
