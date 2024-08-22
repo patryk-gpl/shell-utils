@@ -4,9 +4,9 @@ import re
 from pathlib import Path
 import subprocess
 
-LINE_DELIMITER_LENGTH = 80
+LINE_DELIMITER_LENGTH = 5
 DEFAULT_INCLUDE_FILES = (".sh", ".py", ".env", ".yml", ".yaml")
-DEFAULT_EXCLUDE_PATTERNS = (".venv", ".direnv", ".git")
+DEFAULT_EXCLUDE_PATTERNS = (".venv", ".direnv", ".git", "__pycache__")
 
 
 class FileStructureExporter:
