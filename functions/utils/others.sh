@@ -5,9 +5,39 @@ else
 fi
 prevent_to_execute_directly
 
+utils_generate_content() {
+  local text="$1"
+  local repetitions="$2"
+  local output_file="${3:-output.txt}"
+
+  if [[ -z "$text" || -z "$repetitions" ]]; then
+    echo "Usage: utils_generate_content <text> <repetitions> [output_file]" >&2
+    return 1
+  fi
+
+  if ! [[ "$repetitions" =~ ^[0-9]+$ ]] || ((repetitions <= 0)); then
+    echo "Error: <repetitions> must be a positive integer." >&2
+    return 1
+  fi
+
+  {
+    for ((i = 0; i < repetitions; i++)); do
+      echo "$text"
+    done
+  } >"$output_file"
+
+  # shellcheck disable=SC2181
+  if [[ $? -eq 0 ]]; then
+    echo "Content generated successfully: $output_file"
+  else
+    echo "Failed to generate content." >&2
+    return 1
+  fi
+}
+
 # Extracts a specific function from a given file.
 #
-# Usage: extract_function <filename> <func_name>
+# Usage: utils_extract_function <filename> <func_name>
 #
 # Parameters:
 #   - filename: The name of the file to extract the function from.
@@ -18,13 +48,13 @@ prevent_to_execute_directly
 #   - Returns an error message if the file or function is not found.
 #
 # Example usage:
-#   extract_function "script.sh" "my_function"
-extract_function() {
+#   utils_extract_function "script.sh" "my_function"
+utils_extract_function() {
   local filename=$1
   local func_name=$2
 
   if [[ -z "$filename" || -z "$func_name" ]]; then
-    echo "Usage: extract_function <filename> <func_name>"
+    echo "Usage: utils_extract_function <filename> <func_name>"
     return 1
   fi
 
@@ -47,21 +77,21 @@ extract_function() {
   ' "$filename"
 }
 
-# Function: extract_block
+# Function: utils_extract_block
 # Description: Extracts a block of text from a file based on start and end patterns.
 # Parameters:
 #   - file: The file to extract the block from.
 #   - start_pattern: The pattern that marks the start of the block.
 #   - end_pattern: The pattern that marks the end of the block.
-# Usage: extract_block <file> <start_pattern> <end_pattern>
-# Example: extract_block file.yaml '# Source: release/charts/opensearch/templates/poddisruptionbudget.yaml' '^---'
+# Usage: utils_extract_block <file> <start_pattern> <end_pattern>
+# Example: utils_extract_block file.yaml '# Source: release/charts/opensearch/templates/poddisruptionbudget.yaml' '^---'
 # Returns:
 #   - 0: If the block is successfully extracted.
 #   - 1: If there is an error or the block cannot be found.
-extract_block() {
+utils_extract_block() {
   if [ $# -ne 3 ]; then
-    echo "Usage: extract_block <file> <start_pattern> <end_pattern>" >&2
-    echo "Example: extract_block file.yaml '# Source: netreveal/charts/opensearch/templates/poddisruptionbudget.yaml' '^---'" >&2
+    echo "Usage: utils_extract_block <file> <start_pattern> <end_pattern>" >&2
+    echo "Example: utils_extract_block file.yaml '# Source: netreveal/charts/opensearch/templates/poddisruptionbudget.yaml' '^---'" >&2
     return 1
   fi
 
