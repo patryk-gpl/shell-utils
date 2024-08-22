@@ -35,3 +35,20 @@ gpg_export_private_key() {
   local output_dir="${2:-$HOME}"
   _export_gpg_key "private" "$output_dir"
 }
+
+gpg_encrypt_with_passphrase() {
+  local input_file="$1"
+  local output_file="${2:-$input_file.gpg}"
+
+  if [[ -z "$input_file" ]]; then
+    echo "Usage: gpg_encrypt_with_passphrase <input_file> [output_file]"
+    return 1
+  fi
+
+  if gpg --symmetric --cipher-algo AES256 --output "$output_file" "$input_file"; then
+    echo "File encrypted successfully: $output_file"
+  else
+    echo "Encryption failed."
+    return 1
+  fi
+}
