@@ -32,13 +32,11 @@ function tdestroy() {
   terraform destroy -no-color
 }
 
-#############################################################################################
 # Initialize Terraform remote backend with Azure Storage and make sure plugins are up-to-date
 # Globals:
 #  TERRAFORM_STORAGE_ACCESS_KEY - access key to Azure Storage
 # Returns:
 #  None
-#############################################################################################
 function tinit() {
   if [[ -z "$TERRAFORM_STORAGE_ACCESS_KEY" ]]; then
     echo "TERRAFORM_STORAGE_ACCESS_KEY environment variable not set. Aborting.."
