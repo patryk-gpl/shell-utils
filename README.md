@@ -21,3 +21,5 @@ Additional tips how to distribute / publish / retrieve GPG keys can be found [he
 - [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html)
 - ShellCheck - A shell script [static analysis tool](https://github.com/koalaman/shellcheck)
 - shfmt - [A shell parser, formatter, and interpreter](https://github.com/mvdan/sh)
+- [Add SSL root CA](
+https://help.zscaler.com/zia/adding-custom-certificate-application-specific-trust-store) to application specific trust store
