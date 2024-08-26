@@ -11,10 +11,11 @@ prevent_to_execute_directly
 #   This function creates a password-protected 7zip archive of a specified folder.
 #
 # Parameters:
-#   - $1: The path to the folder to be archived.
+#   - $1: The path to the folder to be archived (mandatory).
+#   - $2: Output filename (optional)
 #
 # Usage:
-#   7zip_archive_with_password <path_to_folder>
+#   7zip_archive_with_password <path_to_folder> [output_filename]
 #
 # Returns:
 #   - 0: If the archive is created successfully.
@@ -25,11 +26,12 @@ prevent_to_execute_directly
 #
 # Example:
 #   7zip_archive_with_password /path/to/folder
+#   7zip_archive_with_password /path/to/folder data.zip
 #
 #   This will create a password-protected 7zip archive of the specified folder.
 7zip_archive_with_password() {
-  if [ -z "$1" ]; then
-    echo "Usage: 7zip_archive_with_password <path_to_folder>"
+  if [ $# -eq 0 ] || [ $# -gt 2 ]; then
+    echo "Usage: 7zip_archive_with_password <path_to_folder> [output_filename]"
     return 1
   fi
 
@@ -38,12 +40,21 @@ prevent_to_execute_directly
     return 1
   fi
 
-  if [ ! -d "$1" ]; then
-    echo "Error: '$1' is not a valid directory"
+  local source_dir="$1"
+  if [ ! -d "$source_dir" ]; then
+    echo "Error: '$source_dir' is not a valid directory"
     return 1
   fi
 
-  archive_name="$(basename "$1")_$(date +%Y%m%d_%H%M%S).7z"
+  local archive_name
+  if [ -n "$2" ]; then
+    archive_name="$2"
+  else
+    archive_name="$(basename "$source_dir")_$(date +%Y%m%d_%H%M%S).7z"
+  fi
+
+  # Ensure the archive name ends with .7z
+  [[ "$archive_name" != *.7z ]] && archive_name="${archive_name}.7z"
 
   # Prompt for password
   echo "Enter password for encryption:"
@@ -55,7 +66,7 @@ prevent_to_execute_directly
   fi
 
   # Use the password with 7z
-  if 7z a -mhe=on -p"$password" "$archive_name" "$1"; then
+  if 7z a -mhe=on -p"$password" "$archive_name" "$source_dir"; then
     echo "Archive created successfully: $archive_name"
   else
     echo "Error creating archive"
