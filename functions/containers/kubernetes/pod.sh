@@ -8,8 +8,19 @@ fi
 prevent_to_execute_directly
 
 # List all images used in the current namespace
-kube_list_image_names_from_pods() {
+kube_pods_list_image_names_per_namespace() {
+  local namespace=${1}
+
+  if [[ -z "$namespace" ]]; then
+    namespace=$(kubectl config view --minify --output 'jsonpath={..namespace}')
+    echo "No namespace provided. Using the current active namespace: $namespace"
+  fi
+
   kubectl get pods -n "$namespace" -o=jsonpath="{range .items[*].spec.containers[*]}{.image}{'\n'}{end}" "$@" | sort -u
+}
+
+kube_pods_list_unique_image_names_all_namespaces() {
+  kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[:space:]' '\n' | sort | uniq
 }
 
 kube_pods_get_cpu_request_limits_details() {
