@@ -10,6 +10,7 @@ ollama_copy_model() {
   if [ $# -ne 4 ]; then
     echo "Error: Incorrect number of parameters."
     echo "Usage: ollama_copy_model <model_name> <model_tag> <remote_host> <dest_dir>"
+    echo "Example: ollama_copy_model phi3.5 3.8b hostname /home/user/.ollama"
     return 1
   fi
 
