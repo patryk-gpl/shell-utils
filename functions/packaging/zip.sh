@@ -30,8 +30,61 @@ prevent_to_execute_directly
 #
 #   This will create a password-protected 7zip archive of the specified folder.
 7zip_archive_with_password() {
-  if [ $# -eq 0 ] || [ $# -gt 2 ]; then
-    echo "Usage: 7zip_archive_with_password <path_to_folder> [output_filename]"
+  local exclude_list=()
+  local auto_exclude=true
+
+  # Function to show usage
+  show_usage() {
+    cat <<EOF
+Usage: 7zip_archive_with_password [-e <list_of_folders_or_files>] [-n] <path_to_folder> [output_filename]
+
+Options:
+  -e, --exclude   Comma-separated list of folders or files to exclude
+  -n, --no-auto   Disable automatic exclusion of common development folders (.git, .direnv, .venv)
+
+Examples:
+  7zip_archive_with_password -e "node_modules,dist" /path/to/folder
+  7zip_archive_with_password -n /path/to/folder custom_output.7z
+
+Notes:
+  - When using the -e or --exclude option, provide a comma-separated list of filenames or directory names to exclude from the archive.
+  - By default, .git, .direnv, and .venv folders are automatically excluded. Use -n to disable this.
+  - If the output filename is not provided, a default name will be generated based on the source directory and the current timestamp.
+EOF
+  }
+
+  # Parse options
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -e | --exclude)
+        if [[ -n $2 ]] && [[ $2 != -* ]]; then
+          IFS=',' read -r -a user_exclude_list <<<"$2"
+          exclude_list+=("${user_exclude_list[@]}")
+          shift 2
+        else
+          echo "Error: --exclude requires a non-empty argument."
+          show_usage
+          return 1
+        fi
+        ;;
+      -n | --no-auto)
+        auto_exclude=false
+        shift
+        ;;
+      -*)
+        echo "Unknown option $1"
+        show_usage
+        return 1
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+
+  # Check remaining arguments
+  if [[ $# -lt 1 ]] || [[ $# -gt 2 ]]; then
+    show_usage
     return 1
   fi
 
@@ -41,13 +94,13 @@ prevent_to_execute_directly
   fi
 
   local source_dir="$1"
-  if [ ! -d "$source_dir" ]; then
+  if [[ ! -d $source_dir ]]; then
     echo "Error: '$source_dir' is not a valid directory"
     return 1
   fi
 
   local archive_name
-  if [ -n "$2" ]; then
+  if [[ -n $2 ]]; then
     archive_name="$2"
   else
     archive_name="$(basename "$source_dir")_$(date +%Y%m%d_%H%M%S).7z"
@@ -60,13 +113,24 @@ prevent_to_execute_directly
   echo "Enter password for encryption:"
   read -r -s password
 
-  if [ -z "$password" ]; then
+  if [[ -z $password ]]; then
     echo "Error: Password cannot be empty"
     return 1
   fi
 
+  # Add automatic exclusions if enabled
+  if $auto_exclude; then
+    exclude_list+=(".git" ".direnv" ".venv")
+  fi
+
+  # Prepare the exclude options for 7z
+  local exclude_opts=()
+  for exclude in "${exclude_list[@]}"; do
+    exclude_opts+=("-xr!*/${exclude}" "-xr!${exclude}")
+  done
+
   # Use the password with 7z
-  if 7z a -mhe=on -p"$password" "$archive_name" "$source_dir"; then
+  if 7z a -mhe=on -p"$password" "${exclude_opts[@]}" "$archive_name" "$source_dir"; then
     echo "Archive created successfully: $archive_name"
   else
     echo "Error creating archive"
