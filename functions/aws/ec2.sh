@@ -153,15 +153,89 @@ aws_ec2_get_instance_id_by_ip() {
 }
 
 aws_ec2_instance_network_details() {
-  local instance_id="$1"
+  local instance_id=""
+  local query_private_ip=false
+  local query_public_ip=false
+  local query_subnet_id=false
+  local query_vpc_id=false
+  local query_network_interfaces=false
+
+  # Function to display usage
+  show_usage() {
+    echo "Usage: aws_ec2_instance_network_details --instance-id <instance_id> [OPTIONS]"
+    echo "Options:"
+    echo "  --private-ip            Query private IP address"
+    echo "  --public-ip             Query public IP address"
+    echo "  --subnet-id             Query subnet ID"
+    echo "  --vpc-id                Query VPC ID"
+    echo "  --network-interfaces    Query network interfaces"
+    echo "  --all                   Query all details (default if no option is specified)"
+  }
+
+  # Parse command line arguments
+  while [[ "$#" -gt 0 ]]; do
+    case $1 in
+      --instance-id)
+        instance_id="$2"
+        shift
+        ;;
+      --private-ip) query_private_ip=true ;;
+      --public-ip) query_public_ip=true ;;
+      --subnet-id) query_subnet_id=true ;;
+      --vpc-id) query_vpc_id=true ;;
+      --network-interfaces) query_network_interfaces=true ;;
+      --all)
+        query_private_ip=true
+        query_public_ip=true
+        query_subnet_id=true
+        query_vpc_id=true
+        query_network_interfaces=true
+        ;;
+      -h | --help)
+        show_usage
+        return 0
+        ;;
+      *)
+        echo "Unknown parameter passed: $1"
+        show_usage
+        return 1
+        ;;
+    esac
+    shift
+  done
 
   if [[ -z "$instance_id" ]]; then
-    echo "Usage: aws_ec2_instance_network_details <instance_id>"
+    echo "Error: Instance ID is required." >&2
+    show_usage
     return 1
   fi
 
+  # If no specific query is requested, query all
+  if ! "$query_private_ip" && ! "$query_public_ip" && ! "$query_subnet_id" && ! "$query_vpc_id" && ! "$query_network_interfaces"; then
+    query_private_ip=true
+    query_public_ip=true
+    query_subnet_id=true
+    query_vpc_id=true
+    query_network_interfaces=true
+  fi
+
+  # Construct the query string
+  local query_parts=()
+  if "$query_private_ip"; then query_parts+=("PrivateIpAddress: PrivateIpAddress"); fi
+  if "$query_public_ip"; then query_parts+=("PublicIpAddress: PublicIpAddress"); fi
+  if "$query_subnet_id"; then query_parts+=("SubnetId: SubnetId"); fi
+  if "$query_vpc_id"; then query_parts+=("VpcId: VpcId"); fi
+  if "$query_network_interfaces"; then query_parts+=("NetworkInterfaces: NetworkInterfaces"); fi
+
+  local query_string
+  query_string=$(
+    IFS=,
+    echo "${query_parts[*]}"
+  )
+
   aws ec2 describe-instances --instance-ids "$instance_id" \
-    --query 'Reservations[].Instances[].{PublicIpAddress: PublicIpAddress, PrivateIpAddress: PrivateIpAddress, SubnetId: SubnetId, VpcId: VpcId, NetworkInterfaces: NetworkInterfaces}'
+    --query "Reservations[].Instances[].{$query_string}" \
+    --output json
 }
 
 aws_ec2_instance_get_size() {
