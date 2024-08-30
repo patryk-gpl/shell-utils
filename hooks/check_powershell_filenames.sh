@@ -3,11 +3,13 @@
 set -euo pipefail
 
 is_pascal_case() {
-    [[ $1 =~ ^[A-Z][a-z0-9]+([A-Z][a-z0-9]+)*$ ]]
+  [[ $1 =~ ^[A-Z][a-z0-9]+([A-Z][a-z0-9]+)*$ ]]
 }
 
 is_verb_noun() {
-    [[ $1 =~ ^[A-Z][a-z]+-[A-Z][a-z]+\.ps1$ ]]
+  local verb_pattern="[A-Z][a-z]+"
+  local noun_pattern="([A-Z][a-z0-9]+)+"
+  [[ $1 =~ ^${verb_pattern}-${noun_pattern}\.ps1$ ]]
 }
 
 # List of approved PowerShell verbs
@@ -63,5 +65,3 @@ for file in "$@"; do
         exit 1
     fi
 done
-
-exit 0
