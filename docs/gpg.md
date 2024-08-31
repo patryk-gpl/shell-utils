@@ -65,8 +65,4 @@ Using these methods, you can ensure that your public GPG key is easily accessibl
 
 ---
 
-[Back to README](../README.md)
-
-```
-
-```
+[Back to Home](../README.md)

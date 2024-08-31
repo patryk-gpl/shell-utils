@@ -16,10 +16,13 @@ gpg --recv-keys D5B5760DAE881A77D30D3C2BEC9DE6EAF150DA18
 
 Additional tips how to distribute / publish / retrieve GPG keys can be found [here](docs/gpg.md).
 
+# Documentation
+
+- Working with [Poetry](docs/poetry.md) and local PyPi registry
+
 # Resources
 
 - [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html)
 - ShellCheck - A shell script [static analysis tool](https://github.com/koalaman/shellcheck)
 - shfmt - [A shell parser, formatter, and interpreter](https://github.com/mvdan/sh)
-- [Add SSL root CA](
-https://help.zscaler.com/zia/adding-custom-certificate-application-specific-trust-store) to application specific trust store
+- [Add SSL root CA](https://help.zscaler.com/zia/adding-custom-certificate-application-specific-trust-store) to application specific trust store

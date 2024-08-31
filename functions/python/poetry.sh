@@ -77,3 +77,35 @@ poetry_disable_package_mode() {
     echo "Successfully added or updated '$setting' in $file."
   fi
 }
+
+poetry_create_package() {
+  local package_name=$1
+  if [[ -z "$package_name" ]]; then
+    echo "Package name is required."
+    return 1
+  fi
+
+  echo "Creating a new Python package named '$package_name'..."
+  poetry new "$package_name"
+  cd "$package_name" || {
+    echo "Failed to enter package directory"
+    return 1
+  }
+
+  echo "Configuring Poetry to use the local PyPi server..."
+  poetry config repositories.local http://localhost:8080
+
+  echo "Adding a simple function to the package..."
+  cat <<EOF >"$package_name/__init__.py"
+def greet():
+    return "Hello, world!"
+EOF
+
+  echo "Building the package..."
+  poetry build
+
+  echo "Publishing the package to the local PyPi server..."
+  poetry publish --repository local
+
+  echo "Package '$package_name' created and published to the local PyPi server."
+}
