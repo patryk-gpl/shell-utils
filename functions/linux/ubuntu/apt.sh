@@ -7,6 +7,37 @@ else
 fi
 prevent_to_execute_directly
 
+ubuntu_upgrade_all() {
+  echo "Updating package lists..."
+  sudo apt update
+
+  echo "Upgrading installed packages..."
+  sudo apt upgrade -y
+
+  echo "Performing distribution upgrade..."
+  sudo apt dist-upgrade -y
+
+  echo "Removing unnecessary packages..."
+  sudo apt autoremove -y
+
+  echo "Cleaning up package cache..."
+  sudo apt clean
+
+  if [ -f /var/run/reboot-required ]; then
+    echo "A system reboot is required to complete the upgrade."
+    read -p "Do you want to reboot now? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      echo "Rebooting the system..."
+      sudo reboot
+    else
+      echo "Please remember to reboot your system later to complete the upgrade."
+    fi
+  else
+    echo "Upgrade completed successfully. No reboot required."
+  fi
+}
+
 apt_history_recent() {
   case "$1" in
     install)
