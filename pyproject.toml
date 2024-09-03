@@ -8,6 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
+toml = "^0.10.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.2.2"
