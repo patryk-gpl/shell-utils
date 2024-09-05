@@ -6,7 +6,7 @@ import subprocess
 
 LINE_DELIMITER_LENGTH = 5
 DEFAULT_INCLUDE_FILES = (".sh", ".py", ".env", ".yml", ".yaml")
-DEFAULT_EXCLUDE_PATTERNS = (".venv", ".direnv", ".git", "__pycache__")
+DEFAULT_EXCLUDE_PATTERNS = (".venv", ".direnv", ".git", "__pycache__", "*.pyc", "*.pyo", "*.pyd", "*.so", "*.dll", "*.dylib", "*.exe", "*.o", "*.a")
 
 
 class FileStructureExporter:
