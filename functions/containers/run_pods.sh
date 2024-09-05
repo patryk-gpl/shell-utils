@@ -6,10 +6,11 @@ fi
 prevent_to_execute_directly
 
 kube_run_pod_python() {
-  local python_version="3.11"
-  local pod_name="python-${python_version//./}-pod"
-  local force=false
+  local image_name="python"
+  local image_tag="3.11-slim"
+  local pod_name="python-pod"
   local username="pyuser"
+  local force=false
 
   while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -17,15 +18,29 @@ kube_run_pod_python() {
         force=true
         shift
         ;;
-      -v | --version)
-        python_version="$2"
-        pod_name="python-${python_version//./}-pod"
+      -i | --image)
+        image_name="$2"
+        shift 2
+        ;;
+      -t | --tag)
+        image_tag="$2"
+        shift 2
+        ;;
+      -n | --name)
+        pod_name="$2"
+        shift 2
+        ;;
+      -u | --user)
+        username="$2"
         shift 2
         ;;
       -h | --help)
-        echo "Usage: kube_run_pod_python [-f|--force] [-v|--version <python_version>]"
+        echo "Usage: kube_run_pod_python [-f|--force] [-i|--image <image_name>] [-t|--tag <image_tag>] [-n|--name <pod_name>] [-u|--user <username>]"
         echo "  -f, --force   Force creation of new pod if it already exists"
-        echo "  -v, --version Specify Python version (default: 3.11)"
+        echo "  -i, --image   Specify the image name (default: python)"
+        echo "  -t, --tag     Specify the image tag (default: 3.11-slim)"
+        echo "  -n, --name    Specify the pod name (default: python-pod)"
+        echo "  -u, --user    Specify the non-root username (default: pyuser)"
         return 0
         ;;
       *)
@@ -34,6 +49,9 @@ kube_run_pod_python() {
         ;;
     esac
   done
+
+  # Construct full image name
+  local full_image_name="${image_name}:${image_tag}"
 
   if kubectl get pod "$pod_name" &>/dev/null; then
     if [ "$force" = true ]; then
@@ -46,7 +64,9 @@ kube_run_pod_python() {
     fi
   fi
 
-  echo "Creating new Python $python_version environment pod..."
+  echo "Creating new Python environment pod..."
+  echo "Using image: $full_image_name"
+  echo "Non-root username: $username"
 
   local yaml_template
   yaml_template=$(
@@ -58,7 +78,7 @@ metadata:
 spec:
   containers:
   - name: python
-    image: python:$python_version-slim
+    image: $full_image_name
     command: ["/bin/bash", "-c"]
     args:
       - |
@@ -87,8 +107,9 @@ EOF
 
   echo "Waiting for pod to be ready..."
   if kubectl wait --for=condition=ready pod/"$pod_name" --timeout=60s; then
-    echo "Python $python_version environment is ready."
-    echo "Pod is running as root user, but a non-root user '$username' is available."
+    echo "Python environment is ready."
+    echo "Pod '$pod_name' is running with image: $full_image_name"
+    echo "A non-root user '$username' is available."
     echo "Use 'kubectl exec -it $pod_name -- bash' to start a root shell in the pod."
     echo "Use 'kubectl exec -it $pod_name -- su - $username' to start a non-root user shell."
     echo "Use 'kubectl delete pod $pod_name' to remove the pod when you're done."
