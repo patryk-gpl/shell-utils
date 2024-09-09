@@ -150,51 +150,9 @@ ollama_update_all_models() {
   fi
 }
 
-ollama_update() {
-  echo "Updating Ollama..."
-
-  current_version=$(ollama -v | awk '{print $NF}')
-  echo "Current Ollama version: $current_version"
-
-  if pgrep -x "ollama" >/dev/null; then
-    echo "Ollama is currently running..."
-    if [[ "$(uname)" == "Linux" ]]; then
-      echo "Stopping Ollama..."
-      sudo systemctl stop ollama || sudo killall ollama
-      sleep 2 # Give it a moment to fully stop
-    elif [[ "$(uname)" == "Darwin" ]]; then
-      echo "Running on macOS. Update Ollama via restarting it from the menu bar."
-      return 1
-    else
-      echo "Unknown operating system"
-      return 1
-    fi
-  fi
-
-  # Backup the current version
-  sudo cp /usr/local/bin/ollama "/usr/local/bin/ollama_$current_version"
-
-  if sudo curl -sL https://ollama.com/download/ollama-linux-amd64 -o /usr/local/bin/ollama; then
-    if sudo chmod +x /usr/local/bin/ollama; then
-      new_version=$(ollama -v | awk '{print $NF}')
-      echo "Ollama has been successfully updated to version $new_version."
-      if [ "$current_version" = "$new_version" ]; then
-        echo "Note: The version number hasn't changed. You might already have the latest version."
-      fi
-      echo "Starting ollama.."
-      sudo systemctl start ollama
-    else
-      echo "Failed to set executable permissions on Ollama."
-      sudo mv "/usr/local/bin/ollama_$current_version" /usr/local/bin/ollama
-      return 1
-    fi
-  else
-    echo "Failed to download the latest version of Ollama."
-    sudo mv "/usr/local/bin/ollama_$current_version" /usr/local/bin/ollama
-    return 1
-  fi
-
-  echo "A backup of the previous version ($current_version) has been saved as /usr/local/bin/ollama_$current_version"
+ollama_install() {
+  echo "Installing Ollama from ollama.com"
+  curl -fsSL https://ollama.com/install.sh | sh
 }
 
 ollama_uninstall() {
