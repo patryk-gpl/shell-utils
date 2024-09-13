@@ -56,7 +56,7 @@ prometheus_service_discovery() {
   if ! check_port "$prometheus_port"; then
     echo "Error: Prometheus port $prometheus_port is not accessible."
     echo "Please ensure you have an active port-forward to the Prometheus pod."
-    echo "Example: kubectl port-forward svc/prometheus-server $prometheus_port:$prometheus_port -n <prometheus-namespace>"
+    echo "Example: kubectl port-forward -n <prometheus-namespace> --address 0.0.0.0 svc/prometheus-server 9090"
     return 1
   fi
 
