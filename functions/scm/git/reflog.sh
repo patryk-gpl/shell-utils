@@ -5,7 +5,7 @@ else
 fi
 prevent_to_execute_directly
 
-function git_reflog_expire() {
+git_reflog_expire_now() {
   if git rev-parse --git-dir >/dev/null 2>&1; then
     git reflog expire --expire=now --all
   else
