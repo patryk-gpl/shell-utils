@@ -5,7 +5,7 @@ else
 fi
 prevent_to_execute_directly
 
-function helm_history_all_releases() {
+helm_history_all_releases() {
   local releases
   releases=$(helm list --all-namespaces --all -o json | jq -r '.[] | "\(.name) \(.namespace)"')
 
