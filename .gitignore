@@ -10,6 +10,8 @@ CTestTestfile.cmake
 .DS_Store
 *.txt
 *.log
+*.csv
+*.json
 
 # Certs
 *.pem
