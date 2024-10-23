@@ -1,7 +1,7 @@
 " Disable line numbers
 set nonumber
 " Prevents Vim from automatically reformatting or reindenting text when you paste it
-set paste
+" set paste
 " This setting allows you to use the system clipboard for copy and paste operations. The "unnamed" option means that any text you copy in Vim will also be available in the system clipboard, and vice versa.
 set clipboard=unnamed
 
