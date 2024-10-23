@@ -20,12 +20,18 @@ kube_show_container_runtime_version() {
 }
 
 kube_cluster_get_ips() {
+  current_context=$(kubectl config current-context 2>/dev/null)
+  if [ -z "$current_context" ]; then
+    echo "Error: No current Kubernetes context found."
+    return 1
+  fi
+
   internal_ip=$(kubectl get svc kubernetes -n default -o jsonpath='{.spec.clusterIP}' 2>/dev/null)
   if [ -z "$internal_ip" ]; then
     internal_ip="Not available"
   fi
 
-  external_url=$(kubectl config view -o jsonpath='{.clusters[0].cluster.server}' 2>/dev/null)
+  external_url=$(kubectl config view -o jsonpath="{.clusters[?(@.name=='$current_context')].cluster.server}" 2>/dev/null)
   if [ -z "$external_url" ]; then
     external_url="Not available"
     external_ip="Not available"
@@ -33,7 +39,7 @@ kube_cluster_get_ips() {
     external_ip=$(echo "$external_url" | sed -e 's|^[^/]*//||' -e 's|:.*$||')
   fi
 
-  echo "Kubernetes Cluster IPs:"
+  echo "Kubernetes Cluster IPs for context: $current_context"
   echo "  Internal IP: $internal_ip"
   echo "  External URL: $external_url"
   echo "  External IP: $external_ip"
