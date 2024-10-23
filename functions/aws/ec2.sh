@@ -172,7 +172,6 @@ aws_ec2_instance_network_details() {
     echo "  --all                   Query all details (default if no option is specified)"
   }
 
-  # Parse command line arguments
   while [[ "$#" -gt 0 ]]; do
     case $1 in
       --instance-id)
