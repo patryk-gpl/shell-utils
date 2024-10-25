@@ -111,6 +111,74 @@ kube_pods_by_status() {
   fi
 }
 
+kube_pods_delete_with_error() {
+  local namespace=""
+
+  show_help() {
+    cat <<EOF
+Usage: kube_delete_error_pods [-n NAMESPACE | --namespace NAMESPACE] [-h | --help]
+Delete all pods with ERROR status in the specified or current namespace.
+
+Options:
+  -n, --namespace NAMESPACE  Specify the namespace (optional)
+  -h, --help                 Display this help message
+
+If no namespace is specified, the current namespace will be used.
+EOF
+  }
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -n | --namespace)
+        if [[ -n "$2" ]] && [[ "${2:0:1}" != "-" ]]; then
+          namespace=$2
+          shift 2
+        else
+          echo "Error: Argument for $1 is missing" >&2
+          return 1
+        fi
+        ;;
+      -h | --help)
+        show_help
+        return 0
+        ;;
+      *)
+        echo "Error: Unsupported argument $1" >&2
+        return 1
+        ;;
+    esac
+  done
+
+  if [[ -z "$namespace" ]]; then
+    namespace=$(kubectl config view --minify --output 'jsonpath={..namespace}')
+    if [[ -z "$namespace" ]]; then
+      echo "Error: Namespace must be specified with -n flag or set in the current context" >&2
+      return 1
+    fi
+  fi
+
+  echo "Checking for ERROR pods in namespace: $namespace"
+  read -ra error_pods <<<"$(kubectl get pods -n "$namespace" --field-selector 'status.phase=Failed' -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | sort)"
+
+  if [[ ${#error_pods[@]} -eq 0 ]]; then
+    echo "No ERROR pods found in namespace $namespace"
+    return 0
+  fi
+
+  echo "The following ERROR pods will be deleted:"
+  printf '  %s\n' "${error_pods[@]}"
+  echo
+
+  echo -n "Are you sure you want to delete these pods? (y/N): "
+  read -r confirm
+  if [[ $confirm =~ ^[Yy]$ ]]; then
+    kubectl delete pod -n "$namespace" "${error_pods[@]}"
+    echo "ERROR pods deleted successfully"
+  else
+    echo "Operation cancelled"
+  fi
+}
+
 # List all images used in the current namespace
 kube_pods_list_image_names_per_namespace() {
   local namespace=${1}
