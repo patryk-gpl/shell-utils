@@ -1,11 +1,5 @@
 # Functions to work with ghq tool
 
-if [[ -n "$ZSH_VERSION" ]]; then
-  source "$(dirname "$0")/../shared.sh"
-else
-  source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
-fi
-prevent_to_execute_directly
 
 cdq() {
   if [[ -z "$1" ]]; then

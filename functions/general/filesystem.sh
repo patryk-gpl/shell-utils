@@ -1,12 +1,5 @@
 # Functions to work with files and folders
 
-if [[ -n "$ZSH_VERSION" ]]; then
-  source "$(dirname "$0")/../shared.sh"
-else
-  source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
-fi
-prevent_to_execute_directly
-
 # Copy folders recursively, excluding files and folders from a config file
 # ~/.rsync.exclude should contain a list of files and folders to be excluded
 #
