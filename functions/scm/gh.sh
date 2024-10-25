@@ -1,12 +1,5 @@
 # Functions to work with Github repositories
 
-if [[ -n "$ZSH_VERSION" ]]; then
-  source "$(dirname "$0")/../shared.sh"
-else
-  source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
-fi
-prevent_to_execute_directly
-
 gh_delete_disabled_workflows_history() {
   if [[ -z $1 || -z $2 ]]; then
     echo "Please provide the organization and repository names as arguments."
