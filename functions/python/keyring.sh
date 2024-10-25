@@ -1,10 +1,3 @@
-if [[ -n "$ZSH_VERSION" ]]; then
-  source "$(dirname "$0")/../shared.sh"
-else
-  source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
-fi
-prevent_to_execute_directly
-
 keyring_is_installed() {
   if ! command -v python3 &>/dev/null && ! command -v python &>/dev/null; then
     echo "Python is not installed."

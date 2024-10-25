@@ -1,12 +1,5 @@
 # Functions to work with SSL/TLS certificates
 
-if [[ -n "$ZSH_VERSION" ]]; then
-  source "$(dirname "$0")/../shared.sh"
-else
-  source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
-fi
-prevent_to_execute_directly
-
 _tls_check_function_params() {
   local cert_file=${1:-}
 

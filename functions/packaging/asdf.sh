@@ -1,12 +1,5 @@
 # Functions to work with asdf tool
 
-if [[ -n "$ZSH_VERSION" ]]; then
-  source "$(dirname "$0")/../shared.sh"
-else
-  source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
-fi
-prevent_to_execute_directly
-
 # Function: asdf_install_plugins
 #
 # Description: Installs plugins for asdf version manager.

@@ -1,12 +1,5 @@
 # Functions to work with Git repositories
 
-if [[ -n "$ZSH_VERSION" ]]; then
-  source "$(dirname "$0")/../shared.sh"
-else
-  source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
-fi
-prevent_to_execute_directly
-
 # Show folder name and its size, sort the result
 git_folder_size() {
   git_dir=${1:-"."}

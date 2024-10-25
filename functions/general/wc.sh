@@ -1,12 +1,5 @@
 # This file contains functions to work wc (word count) tool
 
-if [[ -n "$ZSH_VERSION" ]]; then
-  source "$(dirname "$0")/../shared.sh"
-else
-  source "$(dirname "${BASH_SOURCE[0]}")/../shared.sh"
-fi
-prevent_to_execute_directly
-
 # Count the number of quotes in a file
 wc_count_quotes_in_file() {
   filename=$1
