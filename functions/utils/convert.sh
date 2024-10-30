@@ -25,6 +25,7 @@ decode_base64() {
   done
 
   printf '%s' "$decoded"
+  printf '\n'
 }
 
 # convert myVar to my-var
