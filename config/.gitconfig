@@ -95,6 +95,7 @@
 	howmany = "!sh -c 'git log -a --pretty=oneline | wc -l'"
 	howmanybywhom = shortlog -sn
 	howmanybyemail = shortlog -sen
+	howmanybyall = shortlog -sn --group=author --group=committer # both committer and author
 
 	prsbyauthor = !git log --merges --pretty=\"%an\" | tr '[:upper:]' '[:lower:]' | tr '.' ' ' | sort  |uniq -c | sort -rn
 
