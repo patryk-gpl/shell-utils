@@ -29,6 +29,14 @@ if [ ! -d "$functions_dir" ]; then
     exit 1
 fi
 
+if [ -f "$functions_dir/shared.sh" ]; then
+    # shellcheck disable=SC1091
+    source "$functions_dir/shared.sh"
+else
+    echo "$functions_dir/shared.sh not found."
+    exit 1
+fi
+
 while IFS= read -r -d '' file; do
     # shellcheck disable=SC1090
     source "$file"
