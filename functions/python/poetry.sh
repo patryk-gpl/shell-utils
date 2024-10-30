@@ -70,3 +70,32 @@ poetry_disable_package_mode() {
     echo "Successfully added or updated '$setting' in $file."
   fi
 }
+
+poetry() {
+  if [[ "$1" == "init" ]]; then
+    shift # Remove 'init' from the arguments
+
+    local custom_name="Patryk Kubiak"
+    local custom_email="Patryk.Kubiak@gmail.com"
+    local repo_url
+    local use_custom=false
+
+    if builtin command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      repo_url=$(git config --get remote.origin.url)
+      if [[ $repo_url == *"github.com"* ]]; then
+        use_custom=true
+      fi
+    fi
+
+    if $use_custom; then
+      echo "GitHub repository detected. Using custom author details:"
+      echo "Name: $custom_name, Email: $custom_email"
+      POETRY_NAME="$custom_name" POETRY_EMAIL="$custom_email" builtin command poetry init "$@"
+    else
+      echo "Non-GitHub repository or no repository detected. Using default Poetry settings."
+      builtin command poetry init "$@"
+    fi
+  else
+    builtin command poetry "$@"
+  fi
+}
