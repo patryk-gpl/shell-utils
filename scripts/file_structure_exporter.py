@@ -3,6 +3,7 @@ import argparse
 import re
 from pathlib import Path
 import subprocess
+import sys
 
 LINE_DELIMITER_LENGTH = 5
 DEFAULT_INCLUDE_FILES = (".sh", ".py", ".env", ".yml", ".yaml")
@@ -102,9 +103,12 @@ class FileStructureExporter:
         return total_words, total_files
 
 
+def parse_include_arg(arg):
+    return arg.split(",")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Export the file structure of a directory.")
-    parser.add_argument("root_dir", metavar="ROOT_DIR", type=str, help="The root directory to export.")
     parser.add_argument(
         "--output_file",
         metavar="OUTPUT_FILE",
@@ -112,19 +116,31 @@ def main():
         default=None,
         help="The output file prefix to write the structure to (default: exported_structure_<root_dir_basename>).",
     )
-    parser.add_argument("--include", metavar="INCLUDE", type=str, nargs="*", default=[], help="Additional file extensions, names, or patterns to include.")
+    parser.add_argument(
+        "--include",
+        metavar="INCLUDE",
+        type=parse_include_arg,
+        default=[],
+        help="Comma-separated list of additional file extensions, names, or patterns to include (e.g., '.py,.txt,Makefile').",
+    )
     parser.add_argument(
         "--max_words_per_file", metavar="MAX_WORDS", type=int, default=150000, help="The maximum number of words per output file (default: 150000)."
     )
     parser.add_argument(
         "--exclude",
         metavar="EXCLUDE_PATTERN",
-        type=str,
-        nargs="*",
+        type=parse_include_arg,
         default=[],
-        help="Patterns for folders or files to exclude (in addition to default .venv, .direnv, and .git)",
+        help="Comma-separated list of patterns for folders or files to exclude (in addition to default .venv, .direnv, and .git)",
     )
-    args = parser.parse_args()
+
+    args, remaining = parser.parse_known_args()
+
+    if len(remaining) != 1:
+        parser.print_help()
+        sys.exit(1)
+
+    args.root_dir = remaining[0]
 
     if args.output_file is None:
         root_dir_basename = Path(args.root_dir).name
