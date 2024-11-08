@@ -22,6 +22,7 @@ DEFAULT_EXCLUDE_PATTERNS = (
     "*.exe",
     "*.o",
     "*.a",
+    ".*.*",
 )
 
 
