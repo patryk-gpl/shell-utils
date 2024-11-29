@@ -2,6 +2,7 @@
 
 repo_root=$(git rev-parse --show-toplevel)
 
+load "$repo_root/functions/utils/decode.sh"
 load "$repo_root/functions/utils/convert.sh"
 
 @test "decode_base64" {

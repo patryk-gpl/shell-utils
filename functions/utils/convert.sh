@@ -1,33 +1,3 @@
-decode_base64() {
-  local input="$1"
-  local decoded="$input"
-  local temp
-
-  if [ -z "$input" ]; then
-    echo "Error: input is empty." >&2
-    return 1
-  fi
-
-  while true; do
-    if temp=$(echo -n "$decoded" | base64 -d 2>/dev/null) && [ -n "$temp" ]; then
-      if [ "$temp" = "$decoded" ]; then
-        break
-      fi
-
-      if echo -n "$temp" | LC_ALL=C grep -q '[^[:print:][:space:]]'; then
-        break
-      fi
-
-      decoded="$temp"
-    else
-      break
-    fi
-  done
-
-  printf '%s' "$decoded"
-  printf '\n'
-}
-
 # convert myVar to my-var
 convert_camel_case_to_kebab_case() {
   echo "$1" | sed -r 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:]' '[:lower:]'
