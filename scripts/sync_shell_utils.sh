@@ -17,6 +17,7 @@ resolve_script_path() {
 if [[ -n $BASH_VERSION ]]; then
     script_dir=$(resolve_script_path "${BASH_SOURCE[0]}")
 elif [[ -n $ZSH_VERSION ]]; then
+    # shellcheck disable=SC2296
     script_dir=$(resolve_script_path "${(%):-%N}")
 else
     script_dir=$(resolve_script_path "$0")
