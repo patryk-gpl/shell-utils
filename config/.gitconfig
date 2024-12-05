@@ -71,7 +71,7 @@
 	lg1 = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
 	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
 	grog = log --graph --abbrev-commit --decorate --all --format=format:\"%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(dim white) - %an%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)\"
-  	cam = commit -am
+  cam = commit -am
 	co = checkout
 	please = push --force-with-lease
 	it = !git init . && git commit -m 'Init commit' --allow-empty
@@ -79,7 +79,6 @@
 	# Amend without message update
 	force = "!sh -c 'git commit --amend --no-edit ; git please'"
 	conv = commit -a --amend --no-edit --no-verify
-
 
 	# Amend with message update and push
 	upp = !"sh -c 'git up && git please'"
@@ -106,6 +105,7 @@
 	whoischangingmaster = !sh -c 'git shortlog HEAD..origin/master'
 
 	#what branches you have on origin, with info on who is guilty and how long ago. Useful for gitflow and feature branches in general. Requires fetch up-front.
+  showdetail = show --pretty=format:\"Commit:     %h%nAuthor:     %an <%ae>%nAuth Date:  %ad%nCommitter:  %cn <%ce>%nComm Date:  %cd%nSubject:    %s%n\" --date=format:\"%Y-%m-%d %H:%M:%S\"
 	showorigin = !sh -c "isHash=true; for i in `git ls-remote -h origin`; do [ ! -z $isHash ] &&  echo \" $i\" || printf \"%-8s %8s %-8s%-3s %-10s %-20s\" `git show -s --pretty=format:\"%C(yellow)%h %Cred%ad %Cblue%an\" --date=relative $i`  ; [ ! -z $isHash ] && isHash=\"\" || isHash=true ;  done"
 	updateallbranches = !sh -c "for branchname in `git branch -r `; do git checkout $branchname ; git pull; done"
 
@@ -113,7 +113,6 @@
 	fixgitignore = !git rm -r --cached . && git add . && git commit -m \"Just a .gitignore fix \"
 	showtags = show-ref --tags
 	tagwithdate = !sh -c 'git tag "$0"_$(date "+%y-%m-%d_%H-%M-%S")'
-	purr = pull --rebase
 	difff = diff --color-words #just words
 	bbranch = branch -v
 	sth = stash -u
