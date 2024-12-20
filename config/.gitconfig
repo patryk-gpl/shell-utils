@@ -1,6 +1,8 @@
-[user]
-	name = Patryk Kubiak
-	email = Patryk.Kubiak@gmail.com
+[includeIf "gitdir:~/ghq/github.*/"]
+    path = ~/.gitconfig-priv
+
+[includeIf "gitdir:~/ghq/sourcecode.*.com/"]
+    path = ~/.gitconfig-work
 
 [branch]
 	autosetuprebase = always
@@ -50,7 +52,7 @@
 [core]
 	pager = less -r
 	autocrlf = input
-	excludesfile = /Users/kpatryk/.gitignore_global
+	excludesfile = ~/.gitignore_global
 
 [help]
 	autocorrect = 1
@@ -61,7 +63,9 @@
 
 [credential]
 	#cache credentials for 100 days
-	helper = cache --timeout=8640000
+	helper = osxkeychain
+	helper =
+	helper = /usr/local/share/gcm-core/git-credential-manager
 
 [alias]
 	st = status
@@ -71,7 +75,7 @@
 	lg1 = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
 	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
 	grog = log --graph --abbrev-commit --decorate --all --format=format:\"%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(dim white) - %an%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n %C(white)%s%C(reset)\"
-  cam = commit -am
+    cam = commit -am
 	co = checkout
 	please = push --force-with-lease
 	it = !git init . && git commit -m 'Init commit' --allow-empty
@@ -147,6 +151,7 @@
 	last = log -10 --pretty=format:'%C(yellow)%h%Creset %C(green)%ar%Creset %s'
 	find-large-files = !git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | sed -n 's/^blob //p' | sort -rn -k2 | head -10
 	current-branch = rev-parse --abbrev-ref HEAD
+    show-details = show --pretty=format:\"Author: %an <%ae>%nCommitter: %cn <%ce>%nDate: %cd\"
 
 [mergetool]
 	keepBackup = false
@@ -171,3 +176,7 @@
 	process = git-lfs filter-process
 [fetch]
 	prune = true
+# [credential "https://dev.azure.com"]
+# 	useHttpPath = true
+[rerere]
+	enabled = true
