@@ -18,8 +18,17 @@ Additional tips how to distribute / publish / retrieve GPG keys can be found [he
 
 # Resources
 
+## Styleguides
 - [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html)
+
+## Tools
 - ShellCheck - A shell script [static analysis tool](https://github.com/koalaman/shellcheck)
 - shfmt - [A shell parser, formatter, and interpreter](https://github.com/mvdan/sh)
+
+## Git
+- Caching your GitHub credentials in [Git](https://docs.github.com/en/get-started/getting-started-with-git/caching-your-github-credentials-in-git)
+- Updating credentials from the [macOS Keychain](https://docs.github.com/en/get-started/getting-started-with-git/updating-credentials-from-the-macos-keychain)
+
+## TLS/SSL issues
 - [Add SSL root CA](
 https://help.zscaler.com/zia/adding-custom-certificate-application-specific-trust-store) to application specific trust store
