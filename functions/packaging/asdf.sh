@@ -78,7 +78,7 @@ asdf_install_latest() {
 
   for tool in "$@"; do
     echo "Processing $tool..."
-    if ! asdf plugin list | grep -q "^$tool$"; then
+    if ! asdf plugin list --short | grep -Fx "$tool"; then
       echo "Plugin for $tool is not installed. Attempting to add..."
       if ! asdf plugin add "$tool"; then
         echo "Failed to add plugin for $tool. Skipping."
@@ -87,7 +87,8 @@ asdf_install_latest() {
     fi
 
     echo "Installing latest version of $tool..."
-    if latest_version=$(asdf latest "$tool"); then
+    latest_version=$(asdf latest "$tool")
+    if [[ -n "$latest_version" ]]; then
       if asdf install "$tool" "$latest_version"; then
         echo "Successfully installed $tool $latest_version"
         echo "Setting $tool $latest_version as global..."
@@ -110,31 +111,69 @@ asdf_install_latest() {
   echo "All specified tools have been processed."
 }
 
-asdf_plugin_show_install_script() {
+asdf_plugin_remove() {
   if ! command -v asdf &>/dev/null; then
     echo "Error: asdf is not installed."
     return 1
   fi
 
-  local plugin_name=$1
-  if [[ -z $plugin_name ]]; then
+  local plugin_name="$1"
+
+  if [[ -z "$plugin_name" ]]; then
     echo "Error: Plugin name is missing."
-    echo "Available installed plugins:"
-    asdf plugin list
+    echo "Usage: asdf_plugin_remove <plugin_name>"
+    echo "Example: asdf_plugin_remove python"
     return 1
   fi
 
-  local bin_path="$HOME/.asdf/plugins/$plugin_name/bin/install"
+  if ! asdf plugin list --short | grep -q -F "$plugin_name"; then
+    echo "Plugin '$plugin_name' is not installed. Nothing to remove."
+    return 0
+  fi
 
-  if [[ -f $bin_path ]]; then
-    echo "== Content of the install script for plugin '$plugin_name' =="
-    if command -v bat &>/dev/null; then
-      bat "$bin_path"
-    else
-      cat "$bin_path"
-    fi
+  local removed_versions=()
+  local installed_versions_str
+  installed_versions_str=$(asdf list "$plugin_name" 2>/dev/null)
+
+  if [[ -n "$installed_versions_str" ]]; then
+    while IFS= read -r version; do
+      version="${version//[ *]/}"
+      removed_versions+=("$version")
+    done <<<"$installed_versions_str"
+  fi
+
+  echo "Removing plugin '$plugin_name' and its versions..."
+  if asdf plugin remove "$plugin_name"; then
+    echo "Successfully removed plugin '$plugin_name'."
   else
-    echo "Error: Install script for plugin '$plugin_name' does not exist."
+    echo "Failed to remove plugin '$plugin_name'."
     return 1
   fi
+
+  # Remove entry from ~/.tool-versions (check if it exists first)
+  if [ -f "$HOME/.tool-versions" ]; then
+    if grep -q "^${plugin_name} " "$HOME/.tool-versions"; then
+      if sed -i '' "/^${plugin_name} /d" "$HOME/.tool-versions"; then
+        echo "Removed entry for '$plugin_name' from ~/.tool-versions"
+      else
+        echo "Warning: Could not remove entry for '$plugin_name' from ~/.tool-versions"
+      fi
+    else
+      echo "No entry found for '$plugin_name' in ~/.tool-versions. Skipping removal."
+    fi
+  fi
+
+  echo ""
+  echo "----------------------------------------"
+  echo "Summary of Removed Plugin:"
+  echo "Plugin: $plugin_name"
+
+  if [[ ${#removed_versions[@]} -gt 0 ]]; then
+    echo "Removed Versions:"
+    printf "  - %s\n" "${removed_versions[@]}"
+  else
+    echo "No versions were installed for this plugin."
+  fi
+  echo "----------------------------------------"
+  echo ""
 }
