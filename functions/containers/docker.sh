@@ -8,6 +8,109 @@ fi
 
 prevent_to_execute_directly
 
+docker_update_creds() {
+  local user=""
+  local token=""
+  local legacy_encoded_creds=""
+  local docker_config="${HOME}/.docker/config.json"
+
+  # Define color codes
+  local RED='\033[0;31m'
+  local GREEN='\033[0;32m'
+  local YELLOW='\033[0;33m'
+  local BLUE='\033[0;34m'
+  local NC='\033[0m' # No Color
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --user)
+        if [[ -z "$2" || "$2" == --* ]]; then
+          echo -e "${RED}Error: Missing value for --user${NC}"
+          return 1
+        fi
+        user="$2"
+        shift 2
+        ;;
+      --token)
+        if [[ -z "$2" || "$2" == --* ]]; then
+          echo -e "${RED}Error: Missing value for --token${NC}"
+          return 1
+        fi
+        token="$2"
+        shift 2
+        ;;
+      --legacy-encoded-creds)
+        if [[ -z "$2" || "$2" == --* ]]; then
+          echo -e "${RED}Error: Missing value for --legacy-encoded-creds${NC}"
+          return 1
+        fi
+        legacy_encoded_creds="$2"
+        shift 2
+        ;;
+      *)
+        echo -e "${RED}Unknown option: $1${NC}"
+        echo -e "${YELLOW}Usage: docker_update_creds --user <username> --token <token> --legacy-encoded-creds <encoded_creds>${NC}"
+        return 1
+        ;;
+    esac
+  done
+
+  if [[ -z "$user" || -z "$token" || -z "$legacy_encoded_creds" ]]; then
+    echo -e "${RED}Error: All arguments are required${NC}"
+    echo -e "${YELLOW}Usage: docker_update_creds --user <username> --token <token> --legacy-encoded-creds <encoded_creds>${NC}"
+    return 1
+  fi
+
+  if [[ ! -f "$docker_config" ]]; then
+    echo -e "${RED}Error: Docker config file not found at $docker_config${NC}"
+    echo -e "${YELLOW}Please run 'docker login' first to create the config file${NC}"
+    return 1
+  fi
+
+  local backup_file
+  backup_file="${docker_config}.$(date +%Y%m%d%H%M%S).bak"
+  cp "$docker_config" "$backup_file" || {
+    echo -e "${RED}Error: Failed to create backup file${NC}"
+    return 1
+  }
+  echo -e "${BLUE}Created backup of Docker config file at $backup_file${NC}"
+
+  local new_encoded_creds
+  new_encoded_creds=$(echo -n "${user}:${token}" | base64 | tr -d '\n')
+
+  local count
+  count=$(grep -o "$legacy_encoded_creds" "$docker_config" | wc -l)
+
+  if [ "$count" -eq 0 ]; then
+    echo -e "${YELLOW}Warning: Could not find legacy credentials in Docker config file${NC}"
+    echo -e "${YELLOW}No changes were made to Docker config${NC}"
+    return 1
+  fi
+
+  local tmp_file="${docker_config}.tmp"
+  sed "s/${legacy_encoded_creds}/${new_encoded_creds}/g" "$docker_config" >"$tmp_file" &&
+    mv "$tmp_file" "$docker_config"
+
+  # Verify the replacement
+  local new_count
+  new_count=$(grep -o "$new_encoded_creds" "$docker_config" | wc -l)
+
+  if [ "$new_count" -ge "$count" ]; then
+    echo -e "${GREEN}Successfully updated Docker credentials:${NC}"
+    echo -e "  ${BLUE}Found:${NC} $count occurrences of legacy credentials"
+    echo -e "  ${GREEN}Updated:${NC} $new_count credential entries"
+    if [ "$new_count" -gt "$count" ]; then
+      echo -e "  ${YELLOW}Note:${NC} Additional matches might be due to previously updated credentials"
+    fi
+  else
+    echo -e "${RED}Warning: Replacement verification failed${NC}"
+    echo -e "${RED}Expected at least $count replacements, but found only $new_count${NC}"
+    echo -e "${YELLOW}Restoring backup...${NC}"
+    cp "$backup_file" "$docker_config"
+    return 1
+  fi
+}
+
 # List Docker authentication configurations
 docker_auth_list() {
   if [[ -f ~/.docker/config.json ]]; then
