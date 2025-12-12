@@ -36,7 +36,7 @@ git_history_shrink_storage_size() {
   echo "=> Running repack..."
   git repack -ad --depth=250 --window=250
 
-  echo "=> Remove all remote branches that no longer exist locally..."
+  echo "=> Pruning remote-tracking branches that no longer exist on the remote..."
   git remote prune origin
 
   echo "=> Verify the integrity of the repository..."
