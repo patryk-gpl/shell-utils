@@ -42,3 +42,51 @@ uv_tools_reinstall_missing() {
 
   return 0
 }
+
+uv_venv_from_requirements() {
+  if [[ $# -gt 1 ]] || [[ "${1:-}" == "-h" ]] || [[ "${1:-}" == "--help" ]]; then
+    cat <<EOF
+uv_venv_from_requirements - Create a Python virtual environment in .venv and install requirements using uv.
+
+Usage:
+  uv_venv_from_requirements [requirements_file]
+
+Arguments:
+  [requirements_file]   Optional path to requirements.txt file (default: ./requirements.txt)
+
+This function always creates the virtual environment in the .venv directory in the current working directory.
+EOF
+    return 0
+  fi
+
+  local venv_dir=".venv"
+  local requirements_file
+
+  if [[ $# -eq 0 ]]; then
+    requirements_file="requirements.txt"
+  else
+    requirements_file="$1"
+  fi
+
+  if [[ ! -f "$requirements_file" ]]; then
+    printf 'Error: requirements file "%s" does not exist in the current directory or as specified.\n' "$requirements_file" >&2
+    return 1
+  fi
+
+  if [[ -d "$venv_dir" ]]; then
+    printf 'Warning: virtual environment directory "%s" already exists. Reusing it.\n' "$venv_dir" >&2
+  else
+    if ! uv venv "$venv_dir"; then
+      printf 'Error: Failed to create virtual environment in %s\n' "$venv_dir" >&2
+      return 1
+    fi
+  fi
+
+  if ! uv pip install -r "$requirements_file"; then
+    printf 'Error: Failed to install packages from %s using uv pip\n' "$requirements_file" >&2
+    return 1
+  fi
+
+  printf 'Virtual environment setup complete in %s\n' "$venv_dir"
+  return 0
+}
