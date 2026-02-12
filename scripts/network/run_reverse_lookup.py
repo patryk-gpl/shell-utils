@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
 import argparse
 import ipaddress
 import socket
@@ -49,11 +49,15 @@ class ReverseLookup:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--network", required=True, help="Network subnet in CIDR format e.g 192.168.0")
+    parser.add_argument(
+        "--network", required=True, help="Network subnet in CIDR format e.g 192.168.0"
+    )
     parser.add_argument("--mask", type=int, required=True, help="Subnet mask e.g 24")
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO)  # Set logging level as per requirement (DEBUG/INFO/ERROR)
+    logging.basicConfig(
+        level=logging.INFO
+    )  # Set logging level as per requirement (DEBUG/INFO/ERROR)
     result = ReverseLookup(args.network, args.mask)
     for ip, dns_name in result.run().items():
         if dns_name != "NA":

@@ -1,4 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "pyyaml>=6.0.3",
+# ]
+# ///
 import argparse
 import subprocess
 from typing import Optional
@@ -20,7 +26,9 @@ class ServiceSelectorChecker:
             service_selector_label = self.get_service_selector(vs_service_name)
 
             if not service_selector_label:
-                raise ValueError(f"No service selector found for Service: {vs_service_name}")
+                raise ValueError(
+                    f"No service selector found for Service: {vs_service_name}"
+                )
 
             if vs_service_name != service_selector_label:
                 mismatch = True
@@ -48,7 +56,10 @@ class ServiceSelectorChecker:
 
     def load_kustomize_data(self) -> None:
         kustomize_output = subprocess.run(
-            ["kustomize", "build", self.root_dir], capture_output=True, check=True, text=True
+            ["kustomize", "build", self.root_dir],
+            capture_output=True,
+            check=True,
+            text=True,
         ).stdout
         kustomize_data = yaml.safe_load_all(kustomize_output)
 
