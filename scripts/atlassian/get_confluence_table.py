@@ -1,4 +1,12 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "atlassian-python-api>=4.0.7",
+#     "beautifulsoup4>=4.14.3",
+#     "pandas>=3.0.0",
+# ]
+# ///
 """
 This script extracts tables from a Confluence page and saves them as CSV or JSON files.
 
@@ -36,7 +44,9 @@ class JSONOutputStrategy(OutputStrategy):
 class ConfluenceTableExtractor:
     def __init__(self, base_url, username, api_token, is_cloud):
         self.base_url = base_url
-        self.confluence = Confluence(url=base_url, username=username, password=api_token, cloud=is_cloud)
+        self.confluence = Confluence(
+            url=base_url, username=username, password=api_token, cloud=is_cloud
+        )
         self.output_strategy = None
 
     def set_output_strategy(self, strategy):
@@ -45,14 +55,22 @@ class ConfluenceTableExtractor:
     def get_page_content(self, page_id=None, space_key=None, title=None):
         try:
             if page_id:
-                return self.confluence.get_page_by_id(page_id, expand="body.storage")["body"]["storage"]["value"]
+                return self.confluence.get_page_by_id(page_id, expand="body.storage")[
+                    "body"
+                ]["storage"]["value"]
             elif space_key and title:
-                page = self.confluence.get_page_by_title(space_key, title, expand="body.storage")
+                page = self.confluence.get_page_by_title(
+                    space_key, title, expand="body.storage"
+                )
                 if page is None:
-                    raise ValueError(f"Page not found: space_key={space_key}, title={title}")
+                    raise ValueError(
+                        f"Page not found: space_key={space_key}, title={title}"
+                    )
                 return page["body"]["storage"]["value"]
             else:
-                raise ValueError("Either page_id or both space_key and title must be provided")
+                raise ValueError(
+                    "Either page_id or both space_key and title must be provided"
+                )
         except Exception as e:
             raise ValueError(f"Error fetching page content: {str(e)}")
 
@@ -67,7 +85,9 @@ class ConfluenceTableExtractor:
         try:
             return pd.read_html(table_html)[0]
         except ImportError:
-            print("Error: Missing required dependency. Please install lxml using: pip install lxml")
+            print(
+                "Error: Missing required dependency. Please install lxml using: pip install lxml"
+            )
             raise
 
     def save_table(self, df, output_file):
@@ -81,7 +101,11 @@ class ConfluenceTableExtractor:
         path_segments = parsed_url.path.split("/")
 
         # Extract space key and title from the URL
-        if len(path_segments) >= 5 and path_segments[1] == "wiki" and path_segments[2] == "spaces":
+        if (
+            len(path_segments) >= 5
+            and path_segments[1] == "wiki"
+            and path_segments[2] == "spaces"
+        ):
             space_key = path_segments[3]
             title = path_segments[-1].replace("+", " ")
             return None, space_key, title
@@ -99,16 +123,32 @@ def main():
     parser.add_argument("--url", required=True, help="Full Confluence page URL")
     parser.add_argument("--username", required=True, help="Confluence username")
     parser.add_argument("--token", required=True, help="Confluence API token")
-    parser.add_argument("--cloud", action="store_true", help="Use this flag if using Confluence Cloud")
-    parser.add_argument("--table-index", type=int, default=0, help="Index of the table to extract (0-based)")
-    parser.add_argument("--output", default="output", help="Output file name without extension")
-    parser.add_argument("--format", choices=["csv", "json"], default="csv", help="Output format (csv or json)")
+    parser.add_argument(
+        "--cloud", action="store_true", help="Use this flag if using Confluence Cloud"
+    )
+    parser.add_argument(
+        "--table-index",
+        type=int,
+        default=0,
+        help="Index of the table to extract (0-based)",
+    )
+    parser.add_argument(
+        "--output", default="output", help="Output file name without extension"
+    )
+    parser.add_argument(
+        "--format",
+        choices=["csv", "json"],
+        default="csv",
+        help="Output format (csv or json)",
+    )
 
     args = parser.parse_args()
     parsed_url = urlparse(args.url)
     base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
-    extractor = ConfluenceTableExtractor(base_url, args.username, args.token, args.cloud)
+    extractor = ConfluenceTableExtractor(
+        base_url, args.username, args.token, args.cloud
+    )
 
     if args.format == "csv":
         extractor.set_output_strategy(CSVOutputStrategy())
@@ -133,7 +173,9 @@ def main():
             return
 
         if args.table_index >= len(tables):
-            print(f"Table index {args.table_index} is out of range. There are {len(tables)} tables on the page.")
+            print(
+                f"Table index {args.table_index} is out of range. There are {len(tables)} tables on the page."
+            )
             return
 
         selected_table = tables[args.table_index]

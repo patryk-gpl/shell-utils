@@ -1,8 +1,8 @@
 name: Dependency update
 
 on:
-  schedule:
-    - cron: "0 6 * * 1"
+    schedule:
+      - cron: "0 6 1 * *"
 
 jobs:
   pre-commit:
