@@ -137,7 +137,13 @@ git_history_update_user_data() {
 
   # Restore the origin remote
   if [[ -n "$origin_url" ]]; then
-    git remote add origin "$origin_url"
+    if ! git remote add origin "$origin_url" 2>/dev/null; then
+      # If add fails, try set-url in case remote still exists
+      if ! git remote set-url origin "$origin_url"; then
+        echo "ERROR: Failed to restore origin remote to $origin_url" >&2
+        return 1
+      fi
+    fi
     echo "Origin remote has been restored."
   else
     echo "No origin remote was previously set."
