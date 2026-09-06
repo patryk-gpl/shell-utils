@@ -19,6 +19,9 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Install test dependencies
+      run: sudo apt-get update && sudo apt-get install --no-install-recommends -y git-crypt
+
     - name: Set up mise
       uses: jdx/mise-action@v3
 
