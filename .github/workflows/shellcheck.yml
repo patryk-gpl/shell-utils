@@ -5,6 +5,7 @@ on:
   push:
     branches:
     - main
+    - test
     - feature/*
     - feat/*
     paths-ignore:
@@ -15,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         submodules: recursive
 
@@ -23,14 +24,21 @@ jobs:
       run: sudo apt-get update && sudo apt-get install --no-install-recommends -y git-crypt
 
     - name: Set up mise
-      uses: jdx/mise-action@v3
+      uses: jdx/mise-action@v4.3.0
 
     - name: Run tests
       run: mise run test
 
   shellcheck:
     needs: script-validation
-    uses: kpatryk/workflows/.github/workflows/shellcheck.yml@v0.2.1
-    with:
-      os: ubuntu-latest
-      scandir: functions/
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+
+    - name: Validate with shellcheck
+      uses: ludeeus/action-shellcheck@master
+      with:
+        scandir: functions/
+      env:
+        SHELLCHECK_OPTS: -e SC1091
