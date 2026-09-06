@@ -6,6 +6,7 @@ on:
     branches:
     - main
     - feature/*
+    - feat/*
     paths-ignore:
     - "**/*.md"
 
@@ -16,22 +17,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Check whether shell functions are executable
-      run: |
-        for file in $(find functions -type f -name "*.sh")
-        do
-          if [ -x "$file" ]; then
-            echo "Error: $file is executable" && exit 1
-          fi
-        done
+    - name: Set up mise
+      uses: jdx/mise-action@v3
 
-    - name: Install Bats
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y bats
-
-    - name: Run Bats tests
-      run: bats -r tests/
+    - name: Run tests
+      run: mise run test
 
   shellcheck:
     needs: script-validation

@@ -1,6 +1,11 @@
 [tools]
+bats = "latest"
 pre-commit = "4.6"
 
 [tasks.test]
 description = "Run unit tests for functions"
 run = "bats -r tests/functions"
+
+[tasks.init]
+description = "Initialize repository"
+run = "pre-commit install --install-hooks"

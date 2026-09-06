@@ -43,3 +43,9 @@ repos:
       entry: hooks/check_powershell_filenames.sh
       language: script
       files: '.*\.ps1$'
+
+    - id: check-shell-functions-not-executable
+      name: Check shell functions are not executable
+      entry: hooks/check_shell_functions_not_executable.sh
+      language: script
+      files: '^functions/.*\.sh$'
