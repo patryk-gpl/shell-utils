@@ -1,11 +1,39 @@
 name: Dependency update
 
 on:
-    schedule:
-      - cron: "0 6 1 * *"
+  schedule:
+    # Runs at 06:00 UTC on the 1st of every month
+    - cron: "0 6 1 * *"
+  # Allows running the workflow manually from the Actions tab for testing
+  workflow_dispatch:
 
 jobs:
-  pre-commit:
-    uses: kpatryk/workflows/.github/workflows/pre-commit.yml@v0.2.2
-    with:
-      os: ubuntu-latest
+  pre-commit-autoupdate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Grants the built-in GITHUB_TOKEN permission to push commits
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          # Ensure checkout points to the branch being targeted, not detached HEAD
+          ref: ${{ github.ref_name }}
+
+      - name: Check and update pre-commit hooks
+        run: |
+          # pipx is pre-installed on ubuntu-latest runners; runs pre-commit in isolation
+          pipx run pre-commit autoupdate
+
+          # Only proceed if .pre-commit-config.yaml was modified
+          if ! git diff --quiet .pre-commit-config.yaml; then
+            echo "Updates found, committing changes..."
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            git add .pre-commit-config.yaml
+            git commit -m "build(ci): Updated pre-commit hooks versions [bot]"
+            git push origin HEAD:${{ github.ref_name }}
+          else
+            echo "All pre-commit hooks are already up to date."
+          fi
