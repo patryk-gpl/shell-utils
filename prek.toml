@@ -1,0 +1,45 @@
+# Configuration file for `prek`, a git hook framework written in Rust.
+# See https://prek.j178.dev for more information.
+#:schema https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "https://github.com/jumanjihouse/pre-commit-hooks"
+rev = "3.0.0"
+hooks = [
+  { id = "forbid-binary" },
+  { id = "script-must-have-extension" },
+  { id = "shellcheck" },
+]
+
+[[repos]]
+repo = "https://github.com/scop/pre-commit-shfmt"
+rev = "v3.14.1-1"
+hooks = [
+  { id = "shfmt", args = ["-w", "-i", "2", "-ci"], files = "^(scripts|functions)/.*\\.(sh|bash|ksh)$" },
+]
+
+[[repos]]
+repo = "https://github.com/pre-commit/pre-commit-hooks"
+rev = "v6.0.0"
+hooks = [
+  { id = "check-added-large-files" },
+  { id = "check-executables-have-shebangs" },
+  { id = "check-merge-conflict" },
+  { id = "check-toml" },
+  # Repo contains multi-document YAML files.
+  { id = "check-yaml", args = ["--allow-multiple-documents"] },
+  # functions/security/tls.sh embeds test fixture key material.
+  { id = "detect-private-key", exclude = "^functions/security/tls.sh$" },
+  { id = "end-of-file-fixer" },
+  { id = "fix-byte-order-marker" },
+  { id = "mixed-line-ending" },
+  { id = "trailing-whitespace", args = ["--markdown-linebreak-ext=md"] },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "check-shell-filenames", name = "Check shell script filenames", entry = "hooks/check_shell_filenames.sh", language = "script", files = ".*\\.(sh|bats)$" },
+  { id = "check-powershell-filenames", name = "Check PowerShell filenames", entry = "hooks/check_powershell_filenames.sh", language = "script", files = ".*\\.ps1$" },
+  { id = "check-shell-functions-not-executable", name = "Check shell functions are not executable", entry = "hooks/check_shell_functions_not_executable.sh", language = "script", files = "^functions/.*\\.sh$" },
+]
