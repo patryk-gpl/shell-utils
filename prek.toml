@@ -10,7 +10,8 @@ repo = "https://github.com/jumanjihouse/pre-commit-hooks"
 rev = "3.0.0"
 hooks = [
   { id = "forbid-binary" },
-  { id = "script-must-have-extension" },
+  # Bats tests are shell scripts that use the .bats extension.
+  { id = "script-must-have-extension", exclude = "\\.bats$" },
   { id = "shellcheck" },
 ]
 
