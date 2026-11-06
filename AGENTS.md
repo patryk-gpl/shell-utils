@@ -59,7 +59,7 @@ load "$repo_root/functions/utils/decode.sh"
 ```
 
 Add BATS coverage for new functionality. Keep shell functions
-non-executable; CI validates this and the pre-commit hooks.
+non-executable; CI validates this and the prek hooks.
 
 ## Repository layout
 
@@ -71,7 +71,7 @@ tests/functions/           BATS tests
 tests/test_helper/         BATS support libraries
 mise.toml                  Tools and tasks
 scripts/atlassian/         Python package configuration
-.pre-commit-config.yaml    Git hooks
+prek.toml                  Git hooks
 ```
 
 ## Change checklist

@@ -2,6 +2,9 @@
 # See https://prek.j178.dev for more information.
 #:schema https://www.schemastore.org/prek.json
 
+[update]
+cooldown_days = 7 # Only adopt hook releases at least 7 days old.
+
 [[repos]]
 repo = "https://github.com/jumanjihouse/pre-commit-hooks"
 rev = "3.0.0"

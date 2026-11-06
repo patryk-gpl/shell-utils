@@ -16,7 +16,7 @@ Set-ExecutionPolicy RemoteSigned
 
 ## PSScriptAnalyzer
 
-PSScriptAnalyzer is a static code checker for PowerShell modules and scripts that can be integrated into pre-commit hooks.
+PSScriptAnalyzer is a static code checker for PowerShell modules and scripts that can be integrated into prek hooks.
 
 ```powershell
 Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force

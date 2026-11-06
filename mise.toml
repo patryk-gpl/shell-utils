@@ -1,11 +1,19 @@
 [tools]
 bats = "latest"
-pre-commit = "4.6"
+prek = "0.5"
 
 [tasks.test]
 description = "Run unit tests for functions"
 run = "bats -r tests/functions"
 
-[tasks.init]
-description = "Initialize repository"
-run = "pre-commit install --install-hooks"
+[tasks.install]
+description = "Initialize repository with hooks"
+run = "prek install -f"
+
+[tasks."hooks:run"]
+description = "Run prek hooks on all files"
+run = "prek run --all-files"
+
+[tasks."hooks:update"]
+description = "Update prek hook versions (respects cooldown_days)"
+run = "prek update"

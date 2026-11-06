@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  pre-commit-autoupdate:
+  prek-autoupdate:
     runs-on: ubuntu-latest
     permissions:
       contents: write # Grants the built-in GITHUB_TOKEN permission to push commits
@@ -20,20 +20,22 @@ jobs:
           # Ensure checkout points to the branch being targeted, not detached HEAD
           ref: ${{ github.ref_name }}
 
-      - name: Check and update pre-commit hooks
-        run: |
-          # pipx is pre-installed on ubuntu-latest runners; runs pre-commit in isolation
-          pipx run pre-commit autoupdate
+      - name: Install prek
+        uses: j178/prek-action@v1
 
-          # Only proceed if .pre-commit-config.yaml was modified
-          if ! git diff --quiet .pre-commit-config.yaml; then
+      - name: Check and update prek hooks
+        run: |
+          prek update --cooldown-days 7
+
+          # Only proceed if prek.toml was modified
+          if ! git diff --quiet prek.toml; then
             echo "Updates found, committing changes..."
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
 
-            git add .pre-commit-config.yaml
-            git commit -m "build(ci): Updated pre-commit hooks versions [bot]"
+            git add prek.toml
+            git commit -m "build(ci): Updated prek hooks versions [bot]"
             git push origin HEAD:${{ github.ref_name }}
           else
-            echo "All pre-commit hooks are already up to date."
+            echo "All prek hooks are already up to date."
           fi
